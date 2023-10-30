@@ -62,6 +62,15 @@ class Chatbot:
             new_dlg_turn = DialogueTurn(user_utterance=new_user_utterance)
             new_dlg_turn.gpt3_agent_utterance = reply
             new_dlg_turn.agent_utterance = reply
+        elif pipeline == "reviews":
+            reply = self._generate_review_topics(
+                object_dlg_history,
+                new_user_utterance=new_user_utterance,
+                system_parameters=system_parameters,
+            )
+            new_dlg_turn = DialogueTurn(user_utterance=new_user_utterance)
+            new_dlg_turn.gpt3_agent_utterance = reply
+            new_dlg_turn.agent_utterance = reply
         elif pipeline == "genie":
             new_dlg_turn = self.early_combine_with_replacement_pipeline(
                 object_dlg_history,
@@ -514,6 +523,40 @@ class Chatbot:
             prompt_parameter_values={
                 "dlg": dialog_history,
                 "new_user_utterance": new_user_utterance,
+            },
+            engine=system_parameters.get("engine", self.args.engine),
+            max_tokens=self.args.max_tokens,
+            temperature=self.args.temperature,
+            stop_tokens=["\n"],
+            top_p=self.args.top_p,
+            frequency_penalty=self.args.frequency_penalty,
+            presence_penalty=self.args.presence_penalty,
+            postprocess=True,
+            ban_line_break_start=True,
+        )
+
+        return reply
+
+    def _generate_review_topics(
+            self,
+            dialog_history: List[DialogueTurn],
+            new_user_utterance: str,
+            system_parameters: dict,
+            review: str
+    ) -> str:
+        """
+        Generate baseline GPT3 response
+        Args:
+            - `dialog_history` (list): previous turns
+        Returns:
+            - `reply`(str): GPT3 original response
+        """
+        reply = llm_generate(
+            template_file="prompts/identify_topics_from_review.prompt",
+            prompt_parameter_values={
+                "dlg": dialog_history,
+                "new_user_utterance": new_user_utterance,
+                "review": review
             },
             engine=system_parameters.get("engine", self.args.engine),
             max_tokens=self.args.max_tokens,
