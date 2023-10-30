@@ -87,7 +87,7 @@ class Chatbot:
         end_time = time.time()
         new_dlg_turn.wall_time_seconds = end_time - start_time
         new_dlg_turn.dlg_history = object_dlg_history
-        new_dlg_turn.claim_splitter = self.claim_splitter
+        # new_dlg_turn.claim_splitter = self.claim_splitter
 
         return new_dlg_turn
 
@@ -542,7 +542,6 @@ class Chatbot:
             dialog_history: List[DialogueTurn],
             new_user_utterance: str,
             system_parameters: dict,
-            review: str
     ) -> str:
         """
         Generate baseline GPT3 response
@@ -556,7 +555,6 @@ class Chatbot:
             prompt_parameter_values={
                 "dlg": dialog_history,
                 "new_user_utterance": new_user_utterance,
-                "review": review
             },
             engine=system_parameters.get("engine", self.args.engine),
             max_tokens=self.args.max_tokens,

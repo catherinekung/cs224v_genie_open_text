@@ -52,8 +52,8 @@ def main(args):
         )
 
         dlg_history.append(new_dlg_turn)
-        turn_log = json.dumps(new_dlg_turn.log(), indent=2, ensure_ascii=False)
-        logger.info("Turn log: %s", turn_log)
+        # turn_log = json.dumps(new_dlg_turn.log(), indent=2, ensure_ascii=False)
+        # logger.info("Turn log: %s", turn_log)
         print_chatbot("Chatbot: " + new_dlg_turn.agent_utterance)
 
         make_parent_directories(args.output_file)
@@ -65,9 +65,9 @@ def main(args):
             outfile.write("User: " + new_dlg_turn.user_utterance + "\n")
             outfile.write("Chatbot: " + new_dlg_turn.agent_utterance + "\n")
 
-        with open(args.output_file.strip("txt") + "log", "a") as outfile:
-            outfile.write(turn_log)
-            outfile.write("\n")
+        # with open(args.output_file.strip("txt") + "log", "a") as outfile:
+        #     outfile.write(turn_log)
+        #     outfile.write("\n")
 
 
 if __name__ == "__main__":

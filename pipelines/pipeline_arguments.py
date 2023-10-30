@@ -13,7 +13,8 @@ def add_pipeline_arguments(parser):
         required=True,
         choices=[
             "generate",
-            "genie"
+            "genie",
+            "reviews"
         ],
         default="verify_and_correct",
         help="The type of pipeline used to imrpove GPT-3 response. Only used to know which modules to load.",
