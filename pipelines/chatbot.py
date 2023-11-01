@@ -14,6 +14,8 @@ from .dialog_turn import DialogueTurn
 from .llm import llm_generate
 from .split_claim import ClaimSplitter
 from .utils import is_everything_verified, extract_year, extract_vote
+from .final_project.reviews_util import (extract_restaurant_topic, fetch_reviews, extract_relevant_content,
+                                         summarize_reviews)
 
 logger = logging.getLogger(__name__)
 
@@ -550,23 +552,15 @@ class Chatbot:
         Returns:
             - `reply`(str): GPT3 original response
         """
-        reply = llm_generate(
-            template_file="prompts/identify_topics_from_review.prompt",
-            prompt_parameter_values={
-                "dlg": dialog_history,
-                "new_user_utterance": new_user_utterance,
-            },
-            engine=system_parameters.get("engine", self.args.engine),
-            max_tokens=self.args.max_tokens,
-            temperature=self.args.temperature,
-            stop_tokens=["\n"],
-            top_p=self.args.top_p,
-            frequency_penalty=self.args.frequency_penalty,
-            presence_penalty=self.args.presence_penalty,
-            postprocess=True,
-            ban_line_break_start=True,
-        )
+        topics = ["ambiance", "food quality", "service", "price"] # hardcoded for now
+        restaurant = extract_restaurant_topic(new_user_utterance)
+        reviews = fetch_reviews(restaurant)
+        all_content = []
+        for review in reviews:
+            content = extract_relevant_content(review, topics, dialog_history, self.args, system_parameters)
+            all_content.append(content)
 
+        reply = summarize_reviews(all_content)
         return reply
 
     def _correct(

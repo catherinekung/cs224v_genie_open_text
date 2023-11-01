@@ -48,7 +48,55 @@ assistant_start = "<|assistant_start|>"
 assistant_end = "<|assistant_end|>"
 
 azure_api_version = "2023-05-15"
-all_openai_resources = []
+all_openai_resources = [
+    {
+        "api_type": "azure",
+        "api_version": azure_api_version,
+        "api_base": "https://ovalopenairesource.openai.azure.com/",
+        "api_key": os.getenv("OPENAI_API_KEY"),
+        "engine_map": {
+            "text-davinci-003": "text-davinci-003",
+            "gpt-35-turbo": "gpt-35-turbo",
+            "gpt-35-turbo-instruct": "gpt-35-turbo-instruct",
+            "gpt-4": "gpt-4",
+            "gpt-4-32k": "gpt-4-32k",
+        },
+    },
+    {
+        "api_type": "azure",
+        "api_version": azure_api_version,
+        "api_base": "https://reactgenie-dev.openai.azure.com/",
+        "api_key": os.getenv("OPENAI_API_KEY_1"),
+        "engine_map": {
+            "text-davinci-003": "text_user_study",
+            "gpt-35-turbo": "test_35",
+            "gpt-4": "test",
+            "gpt-4-32k": "test2",
+        },
+    },
+    {
+        "api_type": "azure",
+        "api_version": azure_api_version,
+        "api_base": "https://wikidata.openai.azure.com/",
+        "api_key": os.getenv("OPENAI_API_KEY_2"),
+        "engine_map": {
+            "text-davinci-003": "text-davinci-003",
+            "gpt-35-turbo": "gpt-35-turbo",
+            "gpt-4": "gpt4-8k-playground",
+        },
+    },
+    {
+        "api_type": "azure",
+        "api_version": azure_api_version,
+        "api_base": "https://oval-france-central.openai.azure.com/",
+        "api_key": os.getenv("OPENAI_API_KEY_3"),
+        "engine_map": {
+            "gpt-35-turbo": "gpt-35-turbo",
+            "gpt-4": "gpt-4",
+        },
+    },
+]
+
 all_openai_resources = [
     a for a in all_openai_resources if a["api_key"] is not None
 ]  # remove resources for which we don't have a key
