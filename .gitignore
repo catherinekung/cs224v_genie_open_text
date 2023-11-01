@@ -46,5 +46,5 @@ stackexchange/PyStack/dataset
 /ColBERT/conda_env.yml
 /misc/
 .venv
-dump_data/yelp_data.bson
+pipelines/final_project/dump_data/yelp_data.bson
 pipelines/llm.py
