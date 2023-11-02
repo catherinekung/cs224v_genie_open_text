@@ -80,5 +80,3 @@ if __name__ == "__main__":
     reviews = yelp_reviews.fetch_reviews(user_input)
     for i in reviews:
         print(i)
-
-
