@@ -44,14 +44,14 @@ def extract_topics_from_review(review, dialog_history, args, system_parameters):
 
 def extract_restaurant_topic(user_utterance):
     yelp_reviews = Yelp_Data()
-    topic, restuarant = yelp_reviews.get_topic_and_restuarant(user_utterance)
+    topic, restuarant = yelp_reviews.get_topic_and_restaurant(user_utterance)
     return topic, restuarant
     # pass
 
 
-def fetch_reviews(restaurant):
+def fetch_reviews(user_utterance):
     yelp_reviews = Yelp_Data()
-    reviews = yelp_reviews.fetch_reviews(restaurant)
+    reviews = yelp_reviews.fetch_reviews(user_utterance)
     return reviews
     # pass
 

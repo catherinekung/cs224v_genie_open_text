@@ -6,12 +6,11 @@ class Yelp_Data():
         with open(r'C:\Users\angie\Documents\2.) Stanford\Stanford2023\STANFORD FALL 2023\CS224V\Project\cs224v_genie_open_text\pipelines\final_project\dump_data\yelp_data.bson', 'rb') as f:
             data = bson.decode_all(f.read())
         self.data_reviews_only = {}
-        print("---Narrow Down Database")
         for i in range(len(data)):
             # Check that location, name, and review exist
             if ("name" in data[i]) and ("reviews" in data[i]) and ("location" in data[i]):
                 location = (data[i]["location"]["city"], data[i]["location"]["address1"], data[i]["location"]["zip_code"])
-                name = data[i]["name"] # restuarant name
+                name = data[i]["name"] # restaurant name
                 reviews = data[i]["reviews"] # all reviews
                 self.add_element(self.data_reviews_only, name, location, reviews)
 
@@ -24,58 +23,62 @@ class Yelp_Data():
         else:
             dict_input[name] = [new_dict]
 
-    def get_topic_and_restuarant(self, user_input):
+    def get_topic_and_restaurant(self, user_input):
         try:
             topic = re.search('about the (.+?) at', user_input).group(1)
-            restuarant = user_input.partition("at ")[2]
-            # print(topic)
-            # print(restuarant)
+            restaurant = user_input.partition("at ")[2]
         except AttributeError:
-            raise Exception("Check input, topic or restuarant not extracted")
-        return topic, restuarant
+            raise Exception("Check input, topic or restaurant not extracted")
+        return topic, restaurant
 
-    def get_topic_and_restuarant_with_location(self, user_input):
+    def get_topic_and_restaurant_with_location(self, user_input):
         try:
             topic = re.search('about the (.+?) at', user_input).group(1)
-            restuarant = re.search('at (.+?) in', user_input).group(1)
-            zip = user_input.partition("in ")[2]
-
+            try:
+                zip = user_input.partition("in ")[2]
+                restaurant = re.search('at (.+?) in', user_input).group(1)
+            except:
+                zip = None
+                restaurant = user_input.partition("at ")[2]
             print("\tTopic: ", topic)
-            print("\tRestuarant: ", restuarant)
+            print("\tRestaurant: ", restaurant)
             print("\tZip Code: ",zip)
         except AttributeError:
-            raise Exception("Check input, topic or restuarant not extracted")
-        return topic, restuarant, zip
+            raise Exception("Check input, topic or restaurant not extracted")
+        return topic, restaurant, zip
 
-    def fetch_reviews(self, restuarant):
-        num_locations = len(self.data_reviews_only[restuarant])
+    def fetch_reviews(self, user_input):
+        topic, restaurant = self.get_topic_and_restaurant(user_input)
+        num_locations = len(self.data_reviews_only[restaurant])
         location_idx = ""
         location_key = ""
-        if num_locations > 1:
-            # Ask again with zip code
-            user_input = "Tell me about the ambiance at Carnitas Michoacan in 95138"
-            topic, restuarant, zip = self.get_topic_and_restuarant_with_location(user_input)
+        if num_locations >= 1:
+            topic, restaurant, zip = self.get_topic_and_restaurant_with_location(user_input)
 
-            # Get first review
-            all_reviews = self.data_reviews_only[restuarant]
+            # Get last location review
+            all_reviews = self.data_reviews_only[restaurant]
             for i in range(num_locations):
                 orig_keys = all_reviews[i].keys()
                 keys = list(orig_keys)
                 if keys[0][2] == zip:
                     location_idx = i
                     location_key = keys[0]
+                if zip is None:
+                    location_idx = i
+                    location_key = keys[0]
             reviews = all_reviews[location_idx][location_key]
         else:
-            reviews = self.data_reviews_only[restuarant]
+            reviews = self.data_reviews_only[restaurant]
+        print("\tReview from:", location_key)
         return reviews
         # print("\tReviews: ", reviews)
 
 if __name__ == "__main__":
     print("Hello, World!")
     yelp_reviews = Yelp_Data()
-    user_input = "Tell me about the ambiance at Carnitas Michoacan"
-    topic, restuarant = yelp_reviews.get_topic_and_restuarant(user_input)
-    reviews = yelp_reviews.fetch_reviews(restuarant)
-    print(reviews)
+    user_input = "Tell me about the ambiance at The Funny Farm"
+    reviews = yelp_reviews.fetch_reviews(user_input)
+    for i in reviews:
+        print(i)
 
 
