@@ -3,7 +3,7 @@ import re
 class Yelp_Data():
     def __init__(self):
 
-        with open(r'C:\Users\angie\Documents\2.) Stanford\Stanford2023\STANFORD FALL 2023\CS224V\Project\cs224v_genie_open_text\pipelines\final_project\dump_data\yelp_data.bson', 'rb') as f:
+        with open(r'dump_data/yelp_data.bson', 'rb') as f:
             data = bson.decode_all(f.read())
         self.data_reviews_only = {}
         for i in range(len(data)):

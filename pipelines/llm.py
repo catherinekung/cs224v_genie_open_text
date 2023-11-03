@@ -304,6 +304,8 @@ def _openai_completion_with_backup(original_engine_name: str, kwargs):
         # print("prompt = ", json.dumps(prompt, indent=2, ensure_ascii=False))
 
         with ThreadPoolExecutor(len(prompt)) as executor:
+
+            # if p is printed, dictionary response
             thread_outputs = [executor.submit(f, messages=p) for p in prompt]
         thread_outputs = [o.result() for o in thread_outputs]
 

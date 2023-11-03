@@ -30,14 +30,14 @@ def extract_topics_from_review(review, dialog_history, args, system_parameters):
             "new_user_utterance": review
         },
         engine=system_parameters.get("engine", args.engine),
-        max_tokens=args.max_tokens,
-        temperature=args.temperature,
+        max_tokens=args.max_tokens, # default 200, double check
+        temperature=args.temperature, # lower temp for higher accuracy
         stop_tokens=[],
         top_p=args.top_p,
         frequency_penalty=args.frequency_penalty,
         presence_penalty=args.presence_penalty,
         postprocess=True,
-        ban_line_break_start=True,
+        ban_line_break_start=True, # can set to true/false
     )
 
     return reply
