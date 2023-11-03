@@ -16,7 +16,7 @@ from .split_claim import ClaimSplitter
 from .utils import is_everything_verified, extract_year, extract_vote
 from .final_project.reviews_util import (extract_restaurant_topic, fetch_reviews, extract_relevant_content,
                                          summarize_reviews, extract_topics_from_review)
-
+from .final_project.read_mongo_data import Yelp_Data
 logger = logging.getLogger(__name__)
 
 if not logger.handlers:
@@ -36,6 +36,9 @@ class Chatbot:
             self.claim_splitter = ClaimSplitter(args)
             self.evi_num = args.evi_num
         self.colbert_endpoint = args.colbert_endpoint
+        self.yelp_review = Yelp_Data()
+        self.data_file = r'pipelines/final_project/dump_data/yelp_data.bson'
+        self.data_base = self.yelp_review.get_database(self.data_file)
         self.restaurant = None
     def generate_next_turn(
             self,
@@ -555,9 +558,9 @@ class Chatbot:
         topics = ["ambiance"]#, "food quality", "service", "price"] # hardcoded for now
         # if first turn:
         #     self.restaurant
-        topics_user_spec, restaurant = extract_restaurant_topic(new_user_utterance)
+        topics_user_spec, restaurant = self.yelp_review.get_topic_and_restaurant(new_user_utterance)
         # topics = [topics_user_spec]
-        reviews = fetch_reviews(new_user_utterance)
+        reviews = self.yelp_review.fetch_reviews(new_user_utterance, self.data_base)
         # reviews = ["My friend and I arrived here on a Friday night around 7:30 PM, and it wasn't busy at all. Lots of free space and some customers flowing in for mostly to go orders. One of the few places that open until late.   PARKING: It's part of a huge plaza, so you don't have to worry about parking.   AMBIENCE: The atmosphere of the place is chill and casual. Lots of seating from high to low tables. Great indoor lighting, nice seating, and love the self serve sauce station for unlimited honey mustard and ketchup.   SERVICE: Super fast service, no wait in the line. The cashier delivers you the food to your table and confirms your order.   ORDERS: I ordered the chicken gyro pita, and I love how it's packed with protein and veggies. They got my request right since I didn't want cucumbers in my gyro. Other than it being drenched with sauce, it was a good meal. Chicken on spinning rotisserie is so flavorful, especially with fresh tomatoes, lettuce, and red onions. The pita was so soft to munch on, chicken was tender, and the veggies had a great crunch factor.   RATING: Good place for Greek food!",
         #            "The foods are big portions and super yummy. We ordered  no 4 Kao Gai Sap and no 7 penang curry chicken. Taste super duper good, the price are very affordable. The owner are very nice, and the place is neat, clean and great ambiance. We will return here and high recommended!"]
 
