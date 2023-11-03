@@ -6,9 +6,11 @@ class Yelp_Data():
     # just return data_reviews_only
 
     def __init__(self):
-        # with open(r'pipelines/final_project/dump_data/yelp_data.bson', 'rb') as f:
+        file = r'pipelines/final_project/dump_data/yelp_data.bson'
 
-        with open(r'dump_data/yelp_data.bson', 'rb') as f:
+        with open(r'pipelines/final_project/dump_data/yelp_data.bson', 'rb') as f:
+
+        # with open(r'dump_data/yelp_data.bson', 'rb') as f:
             data = bson.decode_all(f.read())
         self.data_reviews_only = {}
         for i in range(len(data)):
