@@ -1,7 +1,12 @@
 import bson
 import re
 class Yelp_Data():
+
+
+    # just return data_reviews_only
+
     def __init__(self):
+        # with open(r'pipelines/final_project/dump_data/yelp_data.bson', 'rb') as f:
 
         with open(r'dump_data/yelp_data.bson', 'rb') as f:
             data = bson.decode_all(f.read())
@@ -14,6 +19,8 @@ class Yelp_Data():
                 reviews = data[i]["reviews"] # all reviews
                 self.add_element(self.data_reviews_only, name, location, reviews)
 
+    # give restuarants with rating 3.0
+    #{name: {location: reviews}}
     def add_element(self, dict_input, name, location, review):
         new_dict = {location: review}
         # If the key exists, append the review to the existing list of reviews
@@ -63,6 +70,7 @@ class Yelp_Data():
                 if keys[0][2] == zip:
                     location_idx = i
                     location_key = keys[0]
+                    break;
                 if zip is None:
                     location_idx = i
                     location_key = keys[0]
