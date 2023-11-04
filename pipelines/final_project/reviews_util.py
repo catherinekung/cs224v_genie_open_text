@@ -1,5 +1,6 @@
 from ..llm import llm_generate
-from .read_mongo_data import Yelp_Data
+
+
 def extract_relevant_content(review, topics, dialog_history, args, system_parameters):
     reply = llm_generate(
         template_file="final_project/prompts/extract_relevant_content_per_topic.prompt",
@@ -9,7 +10,7 @@ def extract_relevant_content(review, topics, dialog_history, args, system_parame
             "topics": topics
         },
         engine=system_parameters.get("engine", args.engine),
-        max_tokens=args.max_tokens,
+        max_tokens=args.max_tokens, # check if 200 is enough
         temperature=args.temperature,
         stop_tokens=[],
         top_p=args.top_p,
@@ -42,18 +43,10 @@ def extract_topics_from_review(review, dialog_history, args, system_parameters):
 
     return reply
 
-def extract_restaurant_topic(user_utterance):
-    yelp_reviews = Yelp_Data()
-    topic, restuarant = yelp_reviews.get_topic_and_restaurant(user_utterance)
-    return topic, restuarant
-    # pass
 
-
-def fetch_reviews(user_utterance):
-    yelp_reviews = Yelp_Data()
-    reviews = yelp_reviews.fetch_reviews(user_utterance)
-    return reviews
-    # pass
+def is_valid_city(city):
+    # call llm
+    return True
 
 
 def summarize_reviews(reviews):

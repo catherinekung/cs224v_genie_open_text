@@ -3,7 +3,9 @@ import re
 class Yelp_Data():
     # just return data_reviews_only
 
-    # def __init__(self):
+    def __init__(self, file_path):
+        self.data_reviews_only = self.get_database(file_path)
+
     def get_database(self, file_path):
         file = r'pipelines/final_project/dump_data/yelp_data.bson'
         # with open(r'pipelines/final_project/dump_data/yelp_data.bson', 'rb') as f:
@@ -54,16 +56,16 @@ class Yelp_Data():
             raise Exception("Check input, topic or restaurant not extracted")
         return topic, restaurant, zip
 
-    def fetch_reviews(self, user_input, data_reviews_only):
+    def fetch_reviews(self, user_input):
         topic, restaurant = self.get_topic_and_restaurant(user_input)
-        num_locations = len(data_reviews_only[restaurant])
+        num_locations = len(self.data_reviews_only[restaurant])
         location_idx = ""
         location_key = ""
         if num_locations >= 1:
             topic, restaurant, zip = self.get_topic_and_restaurant_with_location(user_input)
 
             # Get last location review
-            all_reviews = data_reviews_only[restaurant]
+            all_reviews = self.data_reviews_only[restaurant]
             for i in range(num_locations):
                 orig_keys = all_reviews[i].keys()
                 keys = list(orig_keys)
@@ -76,17 +78,19 @@ class Yelp_Data():
                     location_key = keys[0]
             reviews = all_reviews[location_idx][location_key]
         else:
-            reviews = data_reviews_only[restaurant]
+            reviews = self.data_reviews_only[restaurant]
         print("\tReview from:", location_key)
         return reviews
         # print("\tReviews: ", reviews)
 
+    def fetch_all_locations_by_city(self, city, restaurant):
+        pass
+
 if __name__ == "__main__":
     print("Hello, World!")
-    yelp_reviews = Yelp_Data()
     file_path = r'dump_data/yelp_data.bson'
-    data_base = yelp_reviews.get_database(file_path)
-    user_input = "Tell me about the ambiance at The Funny Farm"
-    reviews = yelp_reviews.fetch_reviews(user_input, data_base)
+    yelp_reviews = Yelp_Data(file_path)
+    user_input = "Tell me about the ambiance at MOD Pizza"
+    reviews = yelp_reviews.fetch_reviews(user_input)
     for i in reviews:
         print(i)

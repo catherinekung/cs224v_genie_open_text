@@ -21,3 +21,4 @@ tenacity
 python-dateutil
 matplotlib
 text-generation
+pymongo

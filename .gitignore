@@ -48,3 +48,4 @@ stackexchange/PyStack/dataset
 .venv
 pipelines/final_project/dump_data/yelp_data.bson
 pipelines/llm.py
+/pipelines/final_project/dump_data/yelp_data.bson

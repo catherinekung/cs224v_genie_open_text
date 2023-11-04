@@ -8,7 +8,7 @@ import json
 import readline  # enables keyboard arrows when typing in the terminal
 
 from pipelines.dialog_turn import DialogueTurn
-from pipelines.chatbot import Chatbot
+from pipelines.review_chatbot import Chatbot # Final Project Chatbot
 from pipelines.utils import input_user, print_chatbot, make_parent_directories
 from pipelines.pipeline_arguments import (
     add_pipeline_arguments,

@@ -5,9 +5,5 @@ Format your response like the following: \n Review = [review] --> [topic]=[relev
 If there are no relevant sentences, return [topic]=No relevant information found. Return your response as a numbered list.
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
-{% for dlg_turn in dlg[-4:] %}
-    User: {{user_start}}{{ dlg_turn.user_utterance }}{{user_end}}
-    You: {{assistant_start}}{{ dlg_turn.agent_utterance }}{{assistant_end}}
-{% endfor %}
 User: {{user_start}}{{ new_user_utterance }}{{user_end}}
 You:{% endblock %}
