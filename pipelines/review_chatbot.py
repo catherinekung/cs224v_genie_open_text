@@ -99,28 +99,29 @@ class Chatbot:
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
             self.topics = [topics_user_spec]
             reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
-            if isinstance(reviews, dict):
+            if len(reviews) > 0 and isinstance(reviews[0], dict):
                 # case where there are multiple locations
                 self.initial_utterance = False
                 return f"There are multiple locations for {self.restaurant}. Which city would you like to search in?"
             else:
                 return self._main_flow(reviews, dialog_history, system_parameters)
         else:
-            if is_valid_city(new_user_utterance):
+            if is_valid_city(new_user_utterance) and not new_user_utterance.isnumeric():
                 self.options = self.yelp_handler.fetch_all_locations_by_city(new_user_utterance, self.restaurant)
-                if isinstance(self.options, dict):
+                if len(self.options) > 1:
                     # case where there are multiple locations in the city
                     # {location: reviews}
                     i = 1
                     locations = ""
                     for location in self.options:
-                        locations += f"{i}. {location}\n"
+                        locations += f"{i}. {location.get('address')}\n"
+                        i += 1
                     return f"There are multiple locations in {new_user_utterance}, select the location number from the following options: \n{locations}"
-                return self._main_flow(self.options, dialog_history, system_parameters)
+                return self._main_flow(self.options[0].get("reviews"), dialog_history, system_parameters)
             elif new_user_utterance.isnumeric():
                 index = int(new_user_utterance)
-                location = self.options.keys()[index-1]
-                reviews = self.options[location]
+                location = self.options[index-1]
+                reviews = location.get("reviews")
                 return self._main_flow(reviews, dialog_history, system_parameters)
             else:
                 return "Cannot process request"
