@@ -83,25 +83,23 @@ class Chatbot:
 
     def _main_flow(self, reviews, dialog_history, system_parameters):
         all_content = []
+        summarization_content = []
         start_time = time.time()
         for review in reviews:
             content = extract_relevant_content(review, self.topics, dialog_history, self.args, system_parameters)
-            print(content)
             if "No relevant information found" not in content:
                 content = transform_to_bullet_points(content, dialog_history, self.args, system_parameters)
-                print(content)
                 all_content.append(content)
+                summarization_content.append(content)
             else:
-                print(" ")
                 all_content.append(" ")
 
+        self.output_to_csv(reviews, all_content, "HK_Dim_Sum_Food_Quality.csv")
+        reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args, system_parameters)
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
-        self.output_to_csv(reviews, all_content, "HK_Dim_Sum_Food_Quality.csv")
-        return "\n".join(all_content)
-        # reply = summarize_reviews(all_content)
-        # return reply
+        return reply
 
     def _generate_review_topics(
             self,

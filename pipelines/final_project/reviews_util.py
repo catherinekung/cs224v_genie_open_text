@@ -91,5 +91,24 @@ def extract_topics_from_review(review, dialog_history, args, system_parameters):
     # call llm
 
 
-def summarize_reviews(reviews):
-    pass
+def summarize_reviews(bullet_points, topics, restaurant, dialog_history, args, system_parameters):
+    reply = llm_generate(
+        template_file="final_project/prompts/summarize_bullet_points.prompt",
+        prompt_parameter_values={
+            "dlg": dialog_history,
+            "new_user_utterance": bullet_points,
+            "topics": ", ".join(topics),
+            "restaurant": restaurant
+        },
+        engine=system_parameters.get("engine", args.engine),
+        max_tokens=args.max_tokens,
+        temperature=args.temperature,
+        stop_tokens=[],
+        top_p=args.top_p,
+        frequency_penalty=args.frequency_penalty,
+        presence_penalty=args.presence_penalty,
+        postprocess=True,
+        ban_line_break_start=True,
+    )
+
+    return reply
