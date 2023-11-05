@@ -306,8 +306,11 @@ def _openai_completion_with_backup(original_engine_name: str, kwargs):
         with ThreadPoolExecutor(len(prompt)) as executor:
 
             # if p is printed, dictionary response
-            thread_outputs = [executor.submit(f, messages=p) for p in prompt]
-            # print p to verify prompt
+            thread_outputs = []
+            for p in prompt:
+                thread_outputs.append(executor.submit(f, messages=p))
+                # print("Prompt: ", p)
+
         thread_outputs = [o.result() for o in thread_outputs]
 
         # make the outputs of these multiple calls to openai look like one call with batching

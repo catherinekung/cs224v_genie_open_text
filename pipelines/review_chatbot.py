@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 import csv
 from .dialog_turn import DialogueTurn
-from .final_project.reviews_util import (extract_relevant_content, is_valid_city,
+from .final_project.reviews_util import (extract_relevant_content, transform_to_bullet_points,
                                          summarize_reviews, extract_topics_from_review)
 from .final_project.read_mongo_data import Yelp_Data
 
@@ -27,8 +27,8 @@ class Chatbot:
         self.city_confirmed = False
         self.topics = []
         self.locations = []
-        self.review_list = []
-        self.reply_llist = []
+        # self.review_list = []
+        # self.reply_llist = []
         self.yelp_handler = Yelp_Data(r'pipelines/final_project/dump_data/yelp_data.bson')
         self.initial_utterance = True # Tell me about {topic} at {restaurant}
         self.options = None
@@ -72,25 +72,33 @@ class Chatbot:
 
         return new_dlg_turn
 
-    def output_to_csv(self):
-        print(self.review_list)
-        print(self.reply_list)
+    def output_to_csv(self, reviews, replies, filename):
+        # print(self.review_list)
+        # print(self.reply_list)
         # dictionary of lists
-        dict = {'Reviews': self.review_list, 'Replies': self.reply_list}
+        dict = {'Reviews': reviews, 'Replies': replies}
         df = pd.DataFrame(dict)
         # saving the dataframe
-        df.to_csv('output.csv')
+        df.to_csv("pipelines/final_project/outputs/" + filename)
 
     def _main_flow(self, reviews, dialog_history, system_parameters):
         all_content = []
         start_time = time.time()
-        for review in reviews: #[:1]:
-            content, self.review_list, self.reply_list = extract_relevant_content(review, self.topics, dialog_history, self.args, system_parameters)
-            all_content.append(content)
-        self.output_to_csv()
+        for review in reviews:
+            content = extract_relevant_content(review, self.topics, dialog_history, self.args, system_parameters)
+            print(content)
+            if "No relevant information found" not in content:
+                content = transform_to_bullet_points(content, dialog_history, self.args, system_parameters)
+                print(content)
+                all_content.append(content)
+            else:
+                print(" ")
+                all_content.append(" ")
+
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
+        self.output_to_csv(reviews, all_content, "HK_Dim_Sum_Food_Quality.csv")
         return "\n".join(all_content)
         # reply = summarize_reviews(all_content)
         # return reply
@@ -109,6 +117,7 @@ class Chatbot:
             - `reply`(str): GPT3 original response
         """
         if self.initial_utterance:
+            new_user_utterance = "Tell me about the food at HK Dim Sum"
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
             self.topics = [topics_user_spec]
             reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
@@ -119,11 +128,11 @@ class Chatbot:
             else:
                 return self._main_flow(reviews, dialog_history, system_parameters)
         else:
-            if is_valid_city(new_user_utterance, self.restaurant, self.yelp_handler.data_reviews_only) and not new_user_utterance.isnumeric():
+            if self.yelp_handler.is_valid_city(new_user_utterance, self.restaurant) and not new_user_utterance.isnumeric():
                 self.options = self.yelp_handler.fetch_all_locations_by_city(new_user_utterance, self.restaurant)
                 if len(self.options) > 1:
                     # case where there are multiple locations in the city
-                    # {location: reviews}
+                    # [{city: city, address: address, reviews: reviews}]
                     i = 1
                     locations = ""
                     for location in self.options:
@@ -138,4 +147,4 @@ class Chatbot:
                 reviews = location.get("reviews")
                 return self._main_flow(reviews, dialog_history, system_parameters)
             else:
-                return "Cannot process request: Enter City Again?"
+                return f"There are isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"
