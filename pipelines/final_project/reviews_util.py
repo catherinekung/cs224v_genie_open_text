@@ -1,5 +1,6 @@
 from ..llm import llm_generate
-# from read_mongo_data import Yelp_Data
+review_list = []
+reply_list = []
 def extract_relevant_content(review, topics, dialog_history, args, system_parameters):
     reply = llm_generate(
         template_file="final_project/prompts/extract_relevant_content_per_topic.prompt",
@@ -18,8 +19,18 @@ def extract_relevant_content(review, topics, dialog_history, args, system_parame
         postprocess=True,
         ban_line_break_start=True,
     )
-
-    return reply
+    # if len(dialog_history) > 0:
+    #     for i in range(len(dialog_history)):
+    #         print("User: ", dialog_history[i].user_utterance)
+    #         print("Chatbot:", dialog_history[i].agent_utterance)
+    #         print("Reviews", review)
+    #         print("Chatbot Response", reply)
+    # else:
+    #     print("Reviews", review)
+    #     print("Chatbot Response", reply)
+    review_list.append(review)
+    reply_list.append(reply)
+    return reply, review_list, reply_list
 
 
 def extract_topics_from_review(review, dialog_history, args, system_parameters):

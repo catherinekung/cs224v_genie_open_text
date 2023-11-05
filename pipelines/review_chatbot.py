@@ -1,7 +1,8 @@
 import time
 from typing import List
 import logging
-
+import pandas as pd
+import csv
 from .dialog_turn import DialogueTurn
 from .final_project.reviews_util import (extract_relevant_content, is_valid_city,
                                          summarize_reviews, extract_topics_from_review)
@@ -26,6 +27,8 @@ class Chatbot:
         self.city_confirmed = False
         self.topics = []
         self.locations = []
+        self.review_list = []
+        self.reply_llist = []
         self.yelp_handler = Yelp_Data(r'pipelines/final_project/dump_data/yelp_data.bson')
         self.initial_utterance = True # Tell me about {topic} at {restaurant}
         self.options = None
@@ -69,13 +72,22 @@ class Chatbot:
 
         return new_dlg_turn
 
+    def output_to_csv(self):
+        print(self.review_list)
+        print(self.reply_list)
+        # dictionary of lists
+        dict = {'Reviews': self.review_list, 'Replies': self.reply_list}
+        df = pd.DataFrame(dict)
+        # saving the dataframe
+        df.to_csv('output.csv')
+
     def _main_flow(self, reviews, dialog_history, system_parameters):
         all_content = []
         start_time = time.time()
-        for review in reviews[:1]:
-            content = extract_relevant_content(review, self.topics, dialog_history, self.args, system_parameters)
+        for review in reviews: #[:1]:
+            content, self.review_list, self.reply_list = extract_relevant_content(review, self.topics, dialog_history, self.args, system_parameters)
             all_content.append(content)
-
+        self.output_to_csv()
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
