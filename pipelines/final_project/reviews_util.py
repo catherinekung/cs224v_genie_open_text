@@ -1,6 +1,5 @@
 from ..llm import llm_generate
-
-
+# from read_mongo_data import Yelp_Data
 def extract_relevant_content(review, topics, dialog_history, args, system_parameters):
     reply = llm_generate(
         template_file="final_project/prompts/extract_relevant_content_per_topic.prompt",
@@ -44,9 +43,15 @@ def extract_topics_from_review(review, dialog_history, args, system_parameters):
     return reply
 
 
-def is_valid_city(city):
+def is_valid_city(user_input, restaurant, dict):
+    restaurant_data = dict[restaurant]
+    for r in restaurant_data:
+        if r.get("city") == user_input:
+            return True
+        else:
+            continue
+    return False
     # call llm
-    return True
 
 
 def summarize_reviews(reviews):

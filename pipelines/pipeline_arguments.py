@@ -10,13 +10,13 @@ def add_pipeline_arguments(parser):
     parser.add_argument(
         "--pipeline",
         type=str,
-        required=True,
+        required=False,
         choices=[
             "generate",
             "genie",
             "reviews"
         ],
-        default="verify_and_correct",
+        default="reviews",
         help="The type of pipeline used to imrpove GPT-3 response. Only used to know which modules to load.",
     )
     parser.add_argument(
@@ -64,7 +64,8 @@ def add_pipeline_arguments(parser):
     parser.add_argument(
         "--engine",
         type=str,
-        required=True,
+        required=False,
+        default = "gpt-4",
         choices=[
             "atlas",
             "gpt-35-turbo",
@@ -93,7 +94,7 @@ def add_pipeline_arguments(parser):
         "--reranking_method",
         type=str,
         choices=["none", "date", "voting"],
-        default="none",
+        default= "voting", #"none",
         help="Only used for retrieve_and_generate pipeline",
     )
 
@@ -108,7 +109,7 @@ def add_pipeline_arguments(parser):
     parser.add_argument(
         "--temperature",
         type=float,
-        default=0.8,
+        default= 1.0, #0.8,
         required=False,
         help="Only affects user-facing prompts",
     )
@@ -137,7 +138,7 @@ def add_pipeline_arguments(parser):
     parser.add_argument(
         "--evi_num",
         type=int,
-        default=5,
+        default= 2, #5,
         help="Number of evidences to retrieve per claim.",
     )
 

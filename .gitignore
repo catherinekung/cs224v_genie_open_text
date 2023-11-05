@@ -49,3 +49,4 @@ stackexchange/PyStack/dataset
 pipelines/final_project/dump_data/yelp_data.bson
 pipelines/llm.py
 /pipelines/final_project/dump_data/yelp_data.bson
+data/prompt_logs.json

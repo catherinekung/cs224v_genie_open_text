@@ -23,6 +23,7 @@ class Chatbot:
     def __init__(self, args) -> None:
         self.args = args
         self.restaurant = ""
+        self.city_confirmed = False
         self.topics = []
         self.locations = []
         self.yelp_handler = Yelp_Data(r'pipelines/final_project/dump_data/yelp_data.bson')
@@ -106,7 +107,7 @@ class Chatbot:
             else:
                 return self._main_flow(reviews, dialog_history, system_parameters)
         else:
-            if is_valid_city(new_user_utterance) and not new_user_utterance.isnumeric():
+            if is_valid_city(new_user_utterance, self.restaurant, self.yelp_handler.data_reviews_only) and not new_user_utterance.isnumeric():
                 self.options = self.yelp_handler.fetch_all_locations_by_city(new_user_utterance, self.restaurant)
                 if len(self.options) > 1:
                     # case where there are multiple locations in the city
@@ -116,16 +117,13 @@ class Chatbot:
                     for location in self.options:
                         locations += f"{i}. {location.get('address')}\n"
                         i += 1
+                    self.city_confirmed = True
                     return f"There are multiple locations in {new_user_utterance}, select the location number from the following options: \n{locations}"
                 return self._main_flow(self.options[0].get("reviews"), dialog_history, system_parameters)
-            elif new_user_utterance.isnumeric():
+            elif new_user_utterance.isnumeric() and self.city_confirmed:
                 index = int(new_user_utterance)
                 location = self.options[index-1]
                 reviews = location.get("reviews")
                 return self._main_flow(reviews, dialog_history, system_parameters)
             else:
-                return "Cannot process request"
-
-
-
-
+                return "Cannot process request: Enter City Again?"

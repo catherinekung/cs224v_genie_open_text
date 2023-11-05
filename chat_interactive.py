@@ -73,9 +73,10 @@ def main(args):
 if __name__ == "__main__":
     # text generation arguments
     parser = argparse.ArgumentParser()
+
     add_pipeline_arguments(parser)
     parser.add_argument(
-        "--output_file", type=str, required=True, help="Where to write the outputs."
+        "--output_file", type=str, required=False, default = "data/demo.txt",  help="Where to write the outputs."
     )
     parser.add_argument("--no_logging", action="store_true", help="Disables logging")
     parser.add_argument(
@@ -90,8 +91,9 @@ if __name__ == "__main__":
         default=["quit", "q", "Exit"],
         help="The conversation will continue until this string is typed in.",
     )
-
     args = parser.parse_args()
+    print("-----")
+    print(args)
     check_pipeline_arguments(args)
 
     if args.no_logging:

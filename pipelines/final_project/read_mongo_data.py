@@ -89,14 +89,61 @@ class Yelp_Data():
         for r in restaurant_data:
             if r.get("city") == city:
                 locations.append(r)
-
         return locations
+
+    def is_valid_city(self, user_input, restaurant):
+        restaurant_data = self.data_reviews_only[restaurant]
+        for r in restaurant_data:
+            if r.get("city") == user_input:
+                return True
+            else:
+                continue
+        return False
 
 if __name__ == "__main__":
     print("Hello, World!")
     file_path = r'dump_data/yelp_data.bson'
-    yelp_reviews = Yelp_Data(file_path)
-    user_input = "Tell me about the ambiance at MOD Pizza"
-    reviews = yelp_reviews.fetch_reviews(user_input)
-    for i in reviews:
-        print(i)
+    yelp_handler = Yelp_Data(file_path)
+    # user_input = input("User Input: ")#"Tell me about the ambiance at MOD Pizza"
+    # reviews = yelp_reviews.fetch_reviews(user_input)
+    # for i in reviews:
+    #     print(i)
+    initial_utterance = True
+    restaurant = ''
+    city_confirmed = False
+    while True:
+        user_input = input("User Input: ")
+        if user_input == "q":
+            break
+        if initial_utterance:
+            topics_user_spec, restaurant = yelp_handler.get_topic_and_restaurant(user_input)
+            topics = [topics_user_spec]
+            reviews = yelp_handler.fetch_reviews(user_input)
+            if len(reviews) > 0 and isinstance(reviews[0], dict):
+                # case where there are multiple locations
+                initial_utterance = False
+                print(f"There are multiple locations for {restaurant}. Which city would you like to search in?")
+            else:
+                print(reviews)
+        else:
+            if yelp_handler.is_valid_city(user_input, restaurant) and not user_input.isnumeric():
+                options = yelp_handler.fetch_all_locations_by_city(user_input, restaurant)
+                if len(options) > 1:
+                    # case where there are multiple locations in the city
+                    # {location: reviews}
+                    i = 1
+                    locations = ""
+                    for location in options:
+                        locations += f"{i}. {location.get('address')}\n"
+                        i += 1
+                    city_confirmed = True
+                    print(f"There are multiple locations in {user_input}, select the location number from the following options: \n{locations}")
+                # return self._main_flow(self.options[0].get("reviews"), dialog_history, system_parameters)
+            elif user_input.isnumeric() and city_confirmed:
+                index = int(user_input)
+                location = options[index - 1]
+                reviews = location.get("reviews")
+                print(reviews)
+                # return self._main_flow(reviews, dialog_history, system_parameters)
+            else:
+                print("Cannot process request: Enter City Again?")
