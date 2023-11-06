@@ -72,30 +72,32 @@ class Chatbot:
 
         return new_dlg_turn
 
-    def output_to_csv(self, reviews, replies, filename):
+    def output_to_csv(self, reviews, replies, summary, filename):
         # print(self.review_list)
         # print(self.reply_list)
         # dictionary of lists
-        dict = {'Reviews': reviews, 'Replies': replies}
+        dict = {'Reviews': reviews, 'Replies': replies, 'Summary': summary}
         df = pd.DataFrame(dict)
         # saving the dataframe
         df.to_csv("pipelines/final_project/outputs/" + filename)
 
     def _main_flow(self, reviews, dialog_history, system_parameters):
-        all_content = []
+        bullet_content = []
         summarization_content = []
         start_time = time.time()
         for review in reviews:
             content = extract_relevant_content(review, self.topics, dialog_history, self.args, system_parameters)
             if "No relevant information found" not in content:
                 content = transform_to_bullet_points(content, dialog_history, self.args, system_parameters)
-                all_content.append(content)
+                bullet_content.append(content)
                 summarization_content.append(content)
             else:
-                all_content.append(" ")
+                bullet_content.append(" ")
 
-        self.output_to_csv(reviews, all_content, "HK_Dim_Sum_Food_Quality.csv")
         reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args, system_parameters)
+        csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + ".csv"
+        self.output_to_csv(reviews, bullet_content, reply, csv_file_name)
+
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
