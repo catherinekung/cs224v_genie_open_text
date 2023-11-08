@@ -95,7 +95,8 @@ class Chatbot:
                 bullet_content.append(" ")
 
         reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args, system_parameters)
-        csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + ".csv"
+        epoch = round(time.time())
+        csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
         self.output_to_csv(reviews, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
