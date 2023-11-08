@@ -73,8 +73,6 @@ class Chatbot:
         return new_dlg_turn
 
     def output_to_csv(self, reviews, replies, summary, filename):
-        # print(self.review_list)
-        # print(self.reply_list)
         # dictionary of lists
         dict = {'Reviews': reviews, 'Replies': replies, 'Summary': summary}
         df = pd.DataFrame(dict)
@@ -118,9 +116,14 @@ class Chatbot:
             - `reply`(str): GPT3 original response
         """
         if self.initial_utterance:
-            new_user_utterance = "Tell me about the food at HK Dim Sum"
+            new_user_utterance = "Tell me about HK Dim Sum"
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
-            self.topics = [topics_user_spec]
+            if topics_user_spec == None:
+                self.topics = ["ambience"]
+            else:
+                self.topics = [topics_user_spec]
+            # print(self.topics)
+            # print(self.restaurant)
             reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
             if len(reviews) > 0 and isinstance(reviews[0], dict):
                 # case where there are multiple locations

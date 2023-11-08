@@ -30,28 +30,39 @@ class Yelp_Data():
         else:
             dict_input[name] = [new_dict]
 
-    def get_topic_and_restaurant(self, user_input):
+    def get_topic(self, user_input):
         try:
             topic = re.search('about the (.+?) at', user_input).group(1)
+        except:
+            topic = None
+        return topic
+
+    def get_restuarant(self, user_input):
+        if user_input.partition("at ")[2] == "":
+            restaurant = user_input.partition("about ")[2]
+        else:
             restaurant = user_input.partition("at ")[2]
-        except AttributeError:
-            raise Exception("Check input, topic or restaurant not extracted")
+        return restaurant
+
+    def get_zip(self, user_input):
+        try:
+            zip = user_input.partition("in ")[2]
+        except:
+            zip = None
+        return zip
+
+    def get_topic_and_restaurant(self, user_input):
+        topic = self.get_topic(user_input)
+        restaurant = self.get_restuarant(user_input)
         return topic, restaurant
 
     def get_topic_and_restaurant_with_location(self, user_input):
-        try:
-            topic = re.search('about the (.+?) at', user_input).group(1)
-            try:
-                zip = user_input.partition("in ")[2]
-                restaurant = re.search('at (.+?) in', user_input).group(1)
-            except:
-                zip = None
-                restaurant = user_input.partition("at ")[2]
-            print("\tTopic: ", topic)
-            print("\tRestaurant: ", restaurant)
-            print("\tZip Code: ",zip)
-        except AttributeError:
-            raise Exception("Check input, topic or restaurant not extracted")
+        topic = self.get_topic(user_input)
+        restaurant = self.get_restuarant(user_input)
+        zip = self.get_zip(user_input)
+        print("\tTopic: ", topic)
+        print("\tRestaurant: ", restaurant)
+        print("\tZip Code: ",zip)
         return topic, restaurant, zip
 
     def fetch_reviews(self, user_input):
@@ -61,21 +72,6 @@ class Yelp_Data():
         location_idx = ""
         location_key = ""
         if num_locations > 1:
-            # topic, restaurant, zip = self.get_topic_and_restaurant_with_location(user_input)
-            #
-            # # Get last location review
-            # all_reviews = self.data_reviews_only[restaurant]
-            # for i in range(num_locations):
-            #     orig_keys = all_reviews[i].keys()
-            #     keys = list(orig_keys)
-            #     if keys[0][2] == zip:
-            #         location_idx = i
-            #         location_key = keys[0]
-            #         break;
-            #     if zip is None:
-            #         location_idx = i
-            #         location_key = keys[0]
-            # reviews = all_reviews[location_idx][location_key]
             return restaurant_data # return list of location data
         else:
             reviews = restaurant_data[0].get("reviews", [])
@@ -117,6 +113,8 @@ if __name__ == "__main__":
             break
         if initial_utterance:
             topics_user_spec, restaurant = yelp_handler.get_topic_and_restaurant(user_input)
+            print(topics_user_spec)
+            print(restaurant)
             topics = [topics_user_spec]
             reviews = yelp_handler.fetch_reviews(user_input)
             if len(reviews) > 0 and isinstance(reviews[0], dict):
