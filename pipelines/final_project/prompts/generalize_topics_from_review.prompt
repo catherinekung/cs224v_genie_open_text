@@ -1,13 +1,9 @@
 {% block instruction %}
 {{system_start}}You are a friendly, knowledgeable and truthful chatbot, talking to a user.
 The user will provide a list of topics from various Yelp reviews about a restaurant.
-Given the list of sub-topics, create a system that generates 5 overarching topics that best encapsulate these sub-topics.
+Given the list of topics, generate 5 overarching topics that best encapsulate these topics. Return your answer in the format: $topics identified=[topics]$
 Consider utilizing clustering or summarization techniques to identify the most representative themes from the provided subjects.
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
-{% for dlg_turn in dlg[-4:] %}
-    User: {{user_start}}{{ dlg_turn.user_utterance }}{{user_end}}
-    You: {{assistant_start}}{{ dlg_turn.agent_utterance }}{{assistant_end}}
-{% endfor %}
 User: {{user_start}}{{ new_user_utterance }}{{user_end}}
 You:{% endblock %}

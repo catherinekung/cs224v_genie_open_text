@@ -1,12 +1,11 @@
 {% block instruction %}
 {{system_start}}You are a friendly, knowledgeable and truthful chatbot, talking to a user.
-The user will provide a review from Yelp about a restaurant. Identify topics that are talked about in the review.
-For each topic, group the sentences that best match that topic. Return a list of pairs in the format: "topic=sentences".
+The user will provide a review from Yelp about a restaurant. Identify topics that are talked about in the review and return in the format "topics identified=[topics]".
+For each topic, group the sentences that best match that topic. Return a list of topic-sentence pairs in the format: "topic=sentences".
+Example: \n
+Review=The food was amazing. The ambiance was cozy and friendly. The price was reasonable, not too expensive.\n
+topics identified=[food, ambiance, price] food="The food was amazing." ambiance="The ambiance was cozy and friendly" price="The price as reasonable, not too expensive"
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
-{% for dlg_turn in dlg[-4:] %}
-    User: {{user_start}}{{ dlg_turn.user_utterance }}{{user_end}}
-    You: {{assistant_start}}{{ dlg_turn.agent_utterance }}{{assistant_end}}
-{% endfor %}
 User: {{user_start}}{{ new_user_utterance }}{{user_end}}
 You:{% endblock %}

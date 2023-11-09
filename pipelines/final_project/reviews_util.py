@@ -1,106 +1,76 @@
 from ..llm import llm_generate
-# review_list = []
-# reply_list = []
-def extract_relevant_content(review, topics, dialog_history, args, system_parameters):
+import re
+
+def extract_relevant_content(review, topics, dialog_history, args):
     # seems to seek other topics if only one is given, so splitting up into two cases
     if len(topics) > 1:
         template_file = "final_project/prompts/extract_relevant_content_per_topic.prompt"
     else:
         template_file = "final_project/prompts/extract_relevant_content_single_topic.prompt"
+    prompt_parameters = {
+        "dlg": dialog_history,
+        "new_user_utterance": review,
+        "topics": topics
+    }
+    reply = generate_response(template_file, prompt_parameters, args)
+    return reply
+
+
+def transform_to_bullet_points(relevant_sentences, dialog_history, args):
+    template_file = "final_project/prompts/transform_to_bullet_points.prompt"
+    prompt_parameters = {
+        "dlg": dialog_history,
+        "new_user_utterance": relevant_sentences,
+    }
+    reply = generate_response(template_file, prompt_parameters, args)
+    return reply
+
+
+def extract_topics_from_review(review, args):
+    template_file = "final_project/prompts/identify_topics_from_review.prompt"
+    prompt_parameters = {
+        "new_user_utterance": review
+    }
+    reply = generate_response(template_file, prompt_parameters, args)
+    return reply
+
+
+def get_topics_from_response(response):
+    # topics identified=[location, seating, staff, food, entertainment]
+    try:
+        topics = re.search("topics identified=(\[[^\[]*\])", response).group(1)
+        topic_list = topics.strip('][').split(', ')
+        return topic_list
+    except:
+        print(f"Could not get topics from response={response}")
+        return "[]"
+
+
+def generalize_topics(topic_list, args):
+    template_file = "final_project/prompts/generalize_topics_from_review.prompt"
+    prompt_parameters = {
+        "new_user_utterance": topic_list
+    }
+    reply = generate_response(template_file, prompt_parameters, args)
+    return reply
+
+def summarize_reviews(bullet_points, topics, restaurant, dialog_history, args):
+    template_file = "final_project/prompts/summarize_bullet_points.prompt"
+    prompt_parameters = {
+        "dlg": dialog_history,
+        "new_user_utterance": bullet_points,
+        "topics": ", ".join(topics),
+        "restaurant": restaurant
+    }
+    reply = generate_response(template_file, prompt_parameters, args)
+    return reply
+
+
+def generate_response(template_file, prompt_parameters, args):
     reply = llm_generate(
         template_file=template_file,
-        prompt_parameter_values={
-            "dlg": dialog_history,
-            "new_user_utterance": review,
-            "topics": topics
-        },
-        engine=system_parameters.get("engine", args.engine),
-        max_tokens=args.max_tokens, # check if 200 is enough
-        temperature=args.temperature,
-        stop_tokens=[],
-        top_p=args.top_p,
-        frequency_penalty=args.frequency_penalty,
-        presence_penalty=args.presence_penalty,
-        postprocess=True,
-        ban_line_break_start=True,
-    )
-    # if len(dialog_history) > 0:
-    #     for i in range(len(dialog_history)):
-    #         print("User: ", dialog_history[i].user_utterance)
-    #         print("Chatbot:", dialog_history[i].agent_utterance)
-    #         print("Reviews", review)
-    #         print("Chatbot Response", reply)
-    # else:
-    #     print("Reviews", review)
-    #     print("Chatbot Response", reply)
-    # review_list.append(review)
-    # reply_list.append(reply)
-    return reply #, review_list, reply_list
-
-
-def transform_to_bullet_points(relevant_sentences, dialog_history, args, system_parameters):
-    reply = llm_generate(
-        template_file="final_project/prompts/transform_to_bullet_points.prompt",
-        prompt_parameter_values={
-            "dlg": dialog_history,
-            "new_user_utterance": relevant_sentences,
-        },
-        engine=system_parameters.get("engine", args.engine),
-        max_tokens=args.max_tokens, # check if 200 is enough
-        temperature=args.temperature,
-        stop_tokens=[],
-        top_p=args.top_p,
-        frequency_penalty=args.frequency_penalty,
-        presence_penalty=args.presence_penalty,
-        postprocess=True,
-        ban_line_break_start=True,
-    )
-
-    return reply
-
-
-def extract_topics_from_review(review, dialog_history, args, system_parameters):
-    reply = llm_generate(
-        template_file="final_project/prompts/identify_topics_from_review.prompt",
-        prompt_parameter_values={
-            "dlg": dialog_history,
-            "new_user_utterance": review
-        },
-        engine=system_parameters.get("engine", args.engine),
-        max_tokens=args.max_tokens, # default 200, double check
-        temperature=args.temperature, # lower temp for higher accuracy
-        stop_tokens=[],
-        top_p=args.top_p,
-        frequency_penalty=args.frequency_penalty,
-        presence_penalty=args.presence_penalty,
-        postprocess=True,
-        ban_line_break_start=True, # can set to true/false
-    )
-
-    return reply
-
-
-# def is_valid_city(user_input, restaurant, dict):
-#     restaurant_data = dict[restaurant]
-#     for r in restaurant_data:
-#         if r.get("city") == user_input:
-#             return True
-#         else:
-#             continue
-#     return False
-    # call llm
-
-
-def summarize_reviews(bullet_points, topics, restaurant, dialog_history, args, system_parameters):
-    reply = llm_generate(
-        template_file="final_project/prompts/summarize_bullet_points.prompt",
-        prompt_parameter_values={
-            "dlg": dialog_history,
-            "new_user_utterance": bullet_points,
-            "topics": ", ".join(topics),
-            "restaurant": restaurant
-        },
-        engine=system_parameters.get("engine", args.engine),
+        prompt_parameter_values=prompt_parameters,
+        engine=args.engine,
         max_tokens=args.max_tokens,
         temperature=args.temperature,
         stop_tokens=[],
@@ -112,3 +82,5 @@ def summarize_reviews(bullet_points, topics, restaurant, dialog_history, args, s
     )
 
     return reply
+
+
