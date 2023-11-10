@@ -67,20 +67,23 @@ def summarize_reviews(bullet_points, topics, restaurant, dialog_history, args):
 
 
 def generate_response(template_file, prompt_parameters, args):
-    reply = llm_generate(
-        template_file=template_file,
-        prompt_parameter_values=prompt_parameters,
-        engine=args.engine,
-        max_tokens=args.max_tokens,
-        temperature=args.temperature,
-        stop_tokens=[],
-        top_p=args.top_p,
-        frequency_penalty=args.frequency_penalty,
-        presence_penalty=args.presence_penalty,
-        postprocess=True,
-        ban_line_break_start=True,
-    )
-
-    return reply
+    try:
+        reply = llm_generate(
+            template_file=template_file,
+            prompt_parameter_values=prompt_parameters,
+            engine=args.engine,
+            max_tokens=args.max_tokens,
+            temperature=args.temperature,
+            stop_tokens=[],
+            top_p=args.top_p,
+            frequency_penalty=args.frequency_penalty,
+            presence_penalty=args.presence_penalty,
+            postprocess=True,
+            ban_line_break_start=True,
+        )
+        return reply
+    except Exception as e:
+        print("An error occurred when calling the LLM", e)
+        return ""
 
 

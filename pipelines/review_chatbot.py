@@ -7,6 +7,9 @@ from .final_project.reviews_util import (extract_relevant_content, transform_to_
                                          summarize_reviews, extract_topics_from_review, get_topics_from_response,
                                          generalize_topics)
 from .final_project.read_mongo_data import Yelp_Data
+import json
+import os
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -30,25 +33,83 @@ class Chatbot:
         self.yelp_handler = Yelp_Data(r'pipelines/final_project/dump_data/yelp_data.bson')
         self.initial_utterance = True # Tell me about {topic} at {restaurant}
         self.options = None
-        self._generate_top_topics_per_restaurant()
+        self.restaurant_topic_mapping = {}
+        self.restaurant_summary_mapping = {}
+        self._preprocess_steps()
+
+    def _preprocess_steps(self):
+        topic_file_path = "pipelines/final_project/dump_data/restaurant_topics.json"
+        if os.path.exists(topic_file_path):
+            with open(topic_file_path, "r") as file:
+                self.restaurant_topic_mapping = json.load(file)
+        else:
+            self._generate_top_topics_per_restaurant()
+
+        summary_file_path = "pipelines/final_project/dump_data/restaurant_summaries.json"
+        if os.path.exists(summary_file_path):
+            with open(summary_file_path, "r") as file:
+                self.restaurant_summary_mapping = json.load(file)
+        else:
+            self._generate_summaries_based_on_top_topics()
 
     def _generate_top_topics_per_restaurant(self):
+        restaurant_topic_store = {}
         for restaurant, value in self.yelp_handler.data_reviews_only.items():
-            if isinstance(value[0], dict):
-                print(value)
+            if restaurant == "HK Dim Sum" or restaurant == "MOD Pizza":
                 for location in value:
-                    print(f"Getting topics for {restaurant} on {location.get('address')}")
-                    topics_all = []
-                    for review in location.get("reviews"):
-                        response_review = extract_topics_from_review(review, self.args)
-                        topic_list = get_topics_from_response(response_review)
-                        topics_all += topic_list
-                    print("Finished getting all topics for all reviews. Generalizing topics...")
-                    response_generalized = generalize_topics(topics_all, self.args)
-                    top_topics = get_topics_from_response(response_generalized)
-                    location["topics"] = top_topics
-                    # modified in place, might want to store in a file once prompt finalized
-                    print(top_topics)
+                    if location.get("address") != "127 Serramonte Ctr":
+                        print(f"Getting topics for {restaurant} on {location.get('address')}")
+                        topics_all = []
+                        for review in location.get("reviews"):
+                            response_review = extract_topics_from_review(review, self.args)
+                            topic_list = get_topics_from_response(response_review)
+                            topics_all += topic_list
+                        print("Finished getting all topics for all reviews. Generalizing topics...")
+                        response_generalized = generalize_topics(topics_all, self.args)
+                        top_topics = get_topics_from_response(response_generalized)
+                        print(f"Top 5 topics: {top_topics}")
+                        # location["topics"] = top_topics # modifies in place
+
+                        # dump to local file
+                        if len(value) == 1:
+                            restaurant_topic_store[restaurant] = top_topics
+                        else:
+                            entry = {"city": location.get("city"), "address": location.get("address"),
+                                     "topics": top_topics}
+                            if restaurant not in restaurant_topic_store:
+                                restaurant_topic_store[restaurant] = [entry]
+                            else:
+                                restaurant_topic_store[restaurant].append(entry)
+                print(restaurant_topic_store)
+        with open('pipelines/final_project/dump_data/restaurant_topics.json', 'w') as file:
+            json.dump(restaurant_topic_store, file)
+
+    def _generate_summaries_based_on_top_topics(self):
+        restaurant_summary_store = defaultdict(list)
+        # {restaurant: [{topic1: summary, topic2:summary}]
+        for restaurant in self.restaurant_topic_mapping:
+            self.restaurant = restaurant
+            value = self.restaurant_topic_mapping[restaurant]
+            reviews = self.yelp_handler.fetch_reviews(f"Tell me about {restaurant}")
+            if isinstance(value[0], str):
+                topic_summary_mapping = {}
+                for topic in value:
+                    self.topics = [topic]
+                    summary = self._main_flow(reviews, [])
+                    topic_summary_mapping[topic] = summary
+                restaurant_summary_store[restaurant].append(topic_summary_mapping)
+            else:
+                review_list = self.yelp_handler.fetch_reviews(f"Tell me about {restaurant}")
+                for i in range(len(value)):
+                    reviews = review_list[i].get("reviews")
+                    topics = value[i].get("topics")
+                    assert review_list[i].get("address") == value[i].get("address")
+                    topic_summary_mapping = {}
+                    for topic in topics:
+                        self.topics = [topic]
+                        summary = self._main_flow(reviews, [])
+                        topic_summary_mapping[topic] = summary
+                    restaurant_summary_store[restaurant].append(topic_summary_mapping)
 
     def generate_next_turn(
             self,
@@ -92,7 +153,11 @@ class Chatbot:
         # print(self.review_list)
         # print(self.reply_list)
         # dictionary of lists
-        dict = {'Reviews': reviews, 'Replies': replies, 'Summary': summary}
+        reviews.append(" ")
+        replies.append(" ")
+        summaries = [" "] * (len(reviews) - 1)
+        summaries.append(summary)
+        dict = {'Reviews': reviews, 'Replies': replies, 'Summary': summaries}
         df = pd.DataFrame(dict)
         # saving the dataframe
         df.to_csv("pipelines/final_project/outputs/" + filename)

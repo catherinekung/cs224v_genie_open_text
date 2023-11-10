@@ -1,5 +1,6 @@
 import bson
 import re
+from collections import defaultdict
 class Yelp_Data():
     # just return data_reviews_only
 
@@ -10,13 +11,28 @@ class Yelp_Data():
         with open(file_path, 'rb') as f:
             data = bson.decode_all(f.read())
         data_reviews_only = {}
+        restaurants_ratings = defaultdict(list)
         for i in range(len(data)):
             # Check that location, name, and review exist
             if ("name" in data[i]) and ("reviews" in data[i]) and ("location" in data[i]):
                 location = data[i]["location"]
                 name = data[i]["name"] # restaurant name
                 reviews = data[i]["reviews"] # all reviews
+
+                entry = (name, location["address1"], len(reviews))
+                if data[i].get("rating") == 1.0:
+                    restaurants_ratings["one"].append(entry)
+                if data[i].get("rating") == 2.0:
+                    restaurants_ratings["two"].append(entry)
+                if data[i].get("rating") == 3.0:
+                    restaurants_ratings["three"].append(entry)
+                if data[i].get("rating") == 4.0:
+                    restaurants_ratings["four"].append(entry)
+                if data[i].get("rating") == 5.0:
+                    restaurants_ratings["five"].append(entry)
+
                 self.add_element(data_reviews_only, name, location["city"], location["address1"], location["zip_code"], reviews)
+        # print(restaurants_ratings)
         return data_reviews_only
 
     # give restaurants with rating 3.0
