@@ -55,32 +55,30 @@ class Chatbot:
     def _generate_top_topics_per_restaurant(self):
         restaurant_topic_store = {}
         for restaurant, value in self.yelp_handler.data_reviews_only.items():
-            if restaurant == "HK Dim Sum" or restaurant == "MOD Pizza":
-                for location in value:
-                    if location.get("address") != "127 Serramonte Ctr":
-                        print(f"Getting topics for {restaurant} on {location.get('address')}")
-                        topics_all = []
-                        for review in location.get("reviews"):
-                            response_review = extract_topics_from_review(review, self.args)
-                            topic_list = get_topics_from_response(response_review)
-                            topics_all += topic_list
-                        print("Finished getting all topics for all reviews. Generalizing topics...")
-                        response_generalized = generalize_topics(topics_all, self.args)
-                        top_topics = get_topics_from_response(response_generalized)
-                        print(f"Top 5 topics: {top_topics}")
-                        # location["topics"] = top_topics # modifies in place
+            for location in value:
+                print(f"Getting topics for {restaurant} on {location.get('address')}")
+                topics_all = []
+                for review in location.get("reviews"):
+                    response_review = extract_topics_from_review(review, self.args)
+                    topic_list = get_topics_from_response(response_review)
+                    topics_all += topic_list
+                print("Finished getting all topics for all reviews. Generalizing topics...")
+                response_generalized = generalize_topics(topics_all, self.args)
+                top_topics = get_topics_from_response(response_generalized)
+                print(f"Top 5 topics: {top_topics}")
+                # location["topics"] = top_topics # modifies in place
 
-                        # dump to local file
-                        if len(value) == 1:
-                            restaurant_topic_store[restaurant] = top_topics
-                        else:
-                            entry = {"city": location.get("city"), "address": location.get("address"),
-                                     "topics": top_topics}
-                            if restaurant not in restaurant_topic_store:
-                                restaurant_topic_store[restaurant] = [entry]
-                            else:
-                                restaurant_topic_store[restaurant].append(entry)
-                print(restaurant_topic_store)
+                # dump to local file
+                if len(value) == 1:
+                    restaurant_topic_store[restaurant] = top_topics
+                else:
+                    entry = {"city": location.get("city"), "address": location.get("address"),
+                             "topics": top_topics}
+                    if restaurant not in restaurant_topic_store:
+                        restaurant_topic_store[restaurant] = [entry]
+                    else:
+                        restaurant_topic_store[restaurant].append(entry)
+
         with open('pipelines/final_project/dump_data/restaurant_topics.json', 'w') as file:
             json.dump(restaurant_topic_store, file)
 
@@ -95,21 +93,23 @@ class Chatbot:
                 topic_summary_mapping = {}
                 for topic in value:
                     self.topics = [topic]
-                    summary = self._main_flow(reviews, [])
+                    summary = self._main_flow(reviews, [], False)
                     topic_summary_mapping[topic] = summary
                 restaurant_summary_store[restaurant].append(topic_summary_mapping)
             else:
-                review_list = self.yelp_handler.fetch_reviews(f"Tell me about {restaurant}")
                 for i in range(len(value)):
-                    reviews = review_list[i].get("reviews")
+                    loc_review = reviews[i].get("reviews")
                     topics = value[i].get("topics")
-                    assert review_list[i].get("address") == value[i].get("address")
+                    assert reviews[i].get("address") == value[i].get("address")
                     topic_summary_mapping = {}
                     for topic in topics:
                         self.topics = [topic]
-                        summary = self._main_flow(reviews, [])
+                        summary = self._main_flow(loc_review, [], False)
                         topic_summary_mapping[topic] = summary
-                    restaurant_summary_store[restaurant].append(topic_summary_mapping)
+                    restaurant_summary_store[restaurant].append({"topics": topic_summary_mapping, "city": reviews[i].get("city"), "address": reviews[i].get("address")})
+
+        with open('pipelines/final_project/dump_data/restaurant_summaries.json', 'w') as file:
+            json.dump(restaurant_summary_store, file)
 
     def generate_next_turn(
             self,
@@ -162,7 +162,7 @@ class Chatbot:
         # saving the dataframe
         df.to_csv("pipelines/final_project/outputs/" + filename)
 
-    def _main_flow(self, reviews, dialog_history):
+    def _main_flow(self, reviews, dialog_history, save_response=True):
         bullet_content = []
         summarization_content = []
         start_time = time.time()
@@ -176,9 +176,10 @@ class Chatbot:
                 bullet_content.append(" ")
 
         reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args)
-        epoch = round(time.time())
-        csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
-        self._output_to_csv(reviews, bullet_content, reply, csv_file_name)
+        if save_response:
+            epoch = round(time.time())
+            csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
+            self._output_to_csv(reviews, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
