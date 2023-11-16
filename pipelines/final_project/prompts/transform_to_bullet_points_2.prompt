@@ -3,7 +3,7 @@
 Transform the following sentences into concise bullet points, capturing only the main focus of each sentence.
 Remove any unnecessary details and rephrase the content into brief, clear points.
 Add a final bullet point that captures the overall tone and sentiment of the review with regards to the topic.
-Return your response in the following format: Bullet points=[bullet points].
+Return your response in the following format: Bullet points=[bullet points].\n
 
 =====
 Example: \n
@@ -20,13 +20,13 @@ Bullet points=\n
 - Expresses overall dissatisfaction and would not return \n
 =====
 Example: \n
-Original sentences="The atmosphere is casual and inviting. The staff members are generally friendly and efficient, although sometimes during peak hours, the service can be a bit slow. The seating areas are clean and comfortable, providing a pleasant environment to enjoy your meal."\n
+Original sentences="The atmosphere is casual and inviting. The seating areas are clean and comfortable, providing a pleasant environment to enjoy your meal. The music they played was so soothing and was not too loud."\n
 Bullet points=\n
-- Casual and inviting atmosphere.\n
-- Generally friendly and efficient staff.\n
-- Service can be slow during peak hours.\n
-- Clean and comfortable seating areas.
-=====
+- Casual and inviting atmosphere\n
+- Played soothing music, which was not too loud\n
+- Clean and comfortable seating areas\n
+- Expresses overall satisfaction with the ambiance and the environment at the restaurant\n
+=====\n
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
 User: {{user_start}}Original sentences="{{ new_user_utterance }}"{{user_end}}

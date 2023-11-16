@@ -55,7 +55,7 @@ def generalize_topics(topic_list, args):
     return reply
 
 def summarize_reviews(bullet_points, topics, restaurant, dialog_history, args):
-    template_file = "final_project/prompts/summarize_bullet_points.prompt"
+    template_file = "final_project/prompts/summarize_bullet_points_2.prompt"
     prompt_parameters = {
         "dlg": dialog_history,
         "new_user_utterance": bullet_points,
