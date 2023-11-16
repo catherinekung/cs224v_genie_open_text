@@ -1,11 +1,24 @@
 import bson
 import re
 from collections import defaultdict
+import csv
+
+
 class Yelp_Data():
     # just return data_reviews_only
 
     def __init__(self, file_path):
         self.data_reviews_only = self.get_database(file_path)
+        self.load_test_restaurant()
+
+    def load_test_restaurant(self):
+        with open(r"pipelines/final_project/dump_data/test_restaurant_reviews.csv") as file:
+            reviews = []
+            reader = csv.reader(file)
+            for r in reader:
+                reviews.append(r[0])
+
+        self.data_reviews_only["Test Restaurant"] = [{"address": "1234 Crying", "city": "Hell", "reviews": reviews}]
 
     def get_database(self, file_path):
         with open(file_path, 'rb') as f:
