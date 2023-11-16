@@ -30,6 +30,7 @@ class Chatbot:
         self.city_confirmed = False
         self.topics = []
         self.locations = []
+        self.extracted_content = []
         self.yelp_handler = Yelp_Data(r'pipelines/final_project/dump_data/yelp_data.bson')
         self.initial_utterance = True # Tell me about {topic} at {restaurant}
         self.options = None
@@ -149,15 +150,17 @@ class Chatbot:
 
         return new_dlg_turn
 
-    def _output_to_csv(self, reviews, replies, summary, filename):
+    def _output_to_csv(self, reviews, relevent_content, replies, summary, filename):
         # print(self.review_list)
         # print(self.reply_list)
         # dictionary of lists
         reviews.append(" ")
         replies.append(" ")
+        self.extracted_content.append(" ")
+
         summaries = [" "] * (len(reviews) - 1)
         summaries.append(summary)
-        dict = {'Reviews': reviews, 'Replies': replies, 'Summary': summaries}
+        dict = {'Reviews': reviews, 'Relevent Content': self.extracted_content, 'Replies': replies, 'Summary': summaries}
         df = pd.DataFrame(dict)
         # saving the dataframe
         df.to_csv("pipelines/final_project/outputs/" + filename)
@@ -167,9 +170,10 @@ class Chatbot:
         summarization_content = []
         start_time = time.time()
         for review in reviews:
-            content = extract_relevant_content(review, self.topics, dialog_history, self.args)
-            if "No relevant information found" not in content:
-                content = transform_to_bullet_points(content, dialog_history, self.args)
+            relevent_content = extract_relevant_content(review, self.topics, dialog_history, self.args)
+            self.extracted_content.append(relevent_content)
+            if "No relevant information found" not in relevent_content:
+                content = transform_to_bullet_points(relevent_content, dialog_history, self.args)
                 bullet_content.append(content)
                 summarization_content.append(content)
             else:
@@ -179,7 +183,7 @@ class Chatbot:
         if save_response:
             epoch = round(time.time())
             csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
-            self._output_to_csv(reviews, bullet_content, reply, csv_file_name)
+            self._output_to_csv(reviews, self.extracted_content, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
@@ -202,7 +206,7 @@ class Chatbot:
             new_user_utterance = "Tell me about Test Restaurant"
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
             if not topics_user_spec:
-                self.topics = ["ambience"] # return list of top 5 topics
+                self.topics = ["food"] # return list of top 5 topics
             else:
                 self.topics = [topics_user_spec]
             # print(self.topics)
