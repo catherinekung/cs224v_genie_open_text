@@ -17,7 +17,7 @@ def extract_relevant_content(review, topics, dialog_history, args):
 
 
 def transform_to_bullet_points(relevant_sentences, dialog_history, args):
-    template_file = "final_project/prompts/transform_to_bullet_points.prompt"
+    template_file = "final_project/prompts/transform_to_bullet_points_2.prompt"
     prompt_parameters = {
         "dlg": dialog_history,
         "new_user_utterance": relevant_sentences,
