@@ -150,17 +150,16 @@ class Chatbot:
 
         return new_dlg_turn
 
-    def _output_to_csv(self, reviews, relevent_content, replies, summary, filename):
+    def _output_to_csv(self, reviews, replies, summary, filename):
         # print(self.review_list)
         # print(self.reply_list)
         # dictionary of lists
         reviews.append(" ")
         replies.append(" ")
-        self.extracted_content.append(" ")
 
         summaries = [" "] * (len(reviews) - 1)
         summaries.append(summary)
-        dict = {'Reviews': reviews, 'Relevent Content': self.extracted_content, 'Replies': replies, 'Summary': summaries}
+        dict = {'Reviews': reviews, 'Relevant Bullets': replies, 'Summary': summaries}
         df = pd.DataFrame(dict)
         # saving the dataframe
         df.to_csv("pipelines/final_project/outputs/" + filename)
@@ -170,12 +169,11 @@ class Chatbot:
         summarization_content = []
         start_time = time.time()
         for review in reviews:
-            relevent_content = extract_relevant_content(review, self.topics, dialog_history, self.args)
-            self.extracted_content.append(relevent_content)
-            if "No relevant information found" not in relevent_content:
-                content = transform_to_bullet_points(relevent_content, dialog_history, self.args)
-                bullet_content.append(content)
-                summarization_content.append(content)
+            relevant_content = extract_relevant_content(review, self.topics, dialog_history, self.args)
+            if "No relevant information found" not in relevant_content:
+                bullet_content.append(relevant_content)
+                print(relevant_content)
+                summarization_content.append(relevant_content)
             else:
                 bullet_content.append(" ")
 
@@ -183,7 +181,7 @@ class Chatbot:
         if save_response:
             epoch = round(time.time())
             csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
-            self._output_to_csv(reviews, self.extracted_content, bullet_content, reply, csv_file_name)
+            self._output_to_csv(reviews, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")

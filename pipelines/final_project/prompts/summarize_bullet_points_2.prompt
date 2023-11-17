@@ -1,54 +1,61 @@
 {% block instruction %}
 {{system_start}}You are a friendly, knowledgeable and truthful chatbot, talking to a user.
-The user will provide a set of bullet points in the format Bullet points: [bullet points]. The bullet points are extracted from reviews about the restaurant, {{restaurant}}, on the following topic(s): {{topics}}. Summarize the bullet points in a coherent and concise paragraph by highlighting points of similarity and contention across the reviews. Your summary should be organized by sentiment, discussing positive points and/or negative points and end with a concluding remark that mentions the overall sentiment towards the restaurant. Do not just simply combine the bullet points and do not repeat content.\n
+The user will provide a set of bullet points in the format Bullet points: [bullet points].
+The bullet points are extracted from reviews about the restaurant, {{restaurant}}, on the following topic(s): {{topics}}.
+If there are bullets that are not related to the topic(s), omit them from the summary.
+Summarize the bullet points in a coherent and concise paragraph by highlighting points of similarity and contention across the reviews.
+Your summary should be organized by sentiment, discussing positive points and/or negative points and end with a concluding remark that mentions the overall sentiment towards the restaurant.
+Do not just simply combine the bullet points and do not repeat content.
 =====
-Example: \n
-Restaurant=Pizza Eatery
-Topic=Food Quality
-Bullet points=\n
-- Ordered from Doordash \n
-- Small quantity and average taste for high price \n
-- Expresses overall dissatisfaction and would not return \n
-- Pizza was rubbery and watery \n
-- The strawberry smoothie was refreshing \n
-- Pasta had generous portion, but was bland \n
-- Expresses overall dissatisfaction with the food \n
-- The crust on the pizza was perfect \n
-- Toppings made the pizza less greasy \n
-- Paired well with the mango smoothie \n
-- Had a lot of leftovers to bring home \n
-- Overall seems satisfied with the food \n
-- Ordered takeout via online website
-- Food was cold \n
-- Pasta was all clumped together \n
-- Barely filled half of the togo container \n
-- Expresses overall dissatisfaction with the food \n
-Summary=\n
-There seems to be mixed reviews regarding the food at Pizza Eatery. Those who did not dine in at the restaurant had an overall negative experience, stating that the food portions were small and that the food arrived cold. In contrast, those who dined in had mixed sentiments regarding the food. On one hand, some criticized the food for being bland and the pizza for being watery and rubbery. In a positive light, others praised the large portions as well as crust and toppings of the pizza. The smoothies seemed to be a favorite among customers as well. Overall, most people were dissatisfied with the food at Pizza Eatery, especially when it was a take out order.\n
-=====\n
-Example: \n
-Restaurant=Cafe Kitchen
-Topic=Ambiance
-Bullet points=\n
-- Warm and inviting atmosphere \n
-- Greeted with the smell of freshly made coffee \n
-- Background music wasn't too loud or distracting \n
-- Expresses overall satisfaction with the ambiance \n
-- Gets super loud especially during peak hours \n
-- Music is too loud \n
-- Unpleasant odor coming from kitchen \n
-- Expresses overall dissatisfaction with the environment \n
-- A lot of seating, nicely spread out \n
-- Can get a bit loud when it gets busy \n
-- Warm atmosphere \n
-- Overall seems satisfied with the ambiance \n
-- Loved the music they were playing \n
-- Dishes were not clean \n
-- Saw rats running around in the kitchen \n
-- Expresses overall dissatisfaction with the ambiance \n
-Summary=\n
+{{user_start}}
+[These are bullet points related to food quality at Pizza Eatery]
+* Ordered from Doordash
+* Small quantity and average taste for high price
+* Expresses overall dissatisfaction and would not return
+* Pizza was rubbery and watery
+* The strawberry smoothie was refreshing
+* Pasta had generous portion, but was bland
+* Expresses overall dissatisfaction with the food
+* The crust on the pizza was perfect
+* Toppings made the pizza less greasy
+* Paired well with the mango smoothie
+* Had a lot of leftovers to bring home
+* Overall seems satisfied with the food
+* Ordered takeout via online website
+* Food was cold
+* Pasta was all clumped together
+* Barely filled half of the togo container
+* Expresses overall dissatisfaction with the food
+{{user_end}}
+
+{{assistant_start}}
+There seems to be mixed reviews regarding the food at Pizza Eatery. Those who did not dine in at the restaurant had an overall negative experience, stating that the food portions were small and that the food arrived cold. In contrast, those who dined in had mixed sentiments regarding the food. On one hand, some criticized the food for being bland and the pizza for being watery and rubbery. In a positive light, others praised the large portions as well as crust and toppings of the pizza. The smoothies seemed to be a favorite among customers as well. Overall, most people were dissatisfied with the food at Pizza Eatery, especially when it was a take out order.
+{{assistant_end}}
+=====
+{{user_start}}
+[These are bullet points related to ambience at Cafe Kitchen]
+* Warm and inviting atmosphere
+* Greeted with the smell of freshly made coffee
+* Background music wasn't too loud or distracting
+* Expresses overall satisfaction with the ambiance
+* Gets super loud especially during peak hours
+* Music is too loud
+* Unpleasant odor coming from kitchen
+* Expresses overall dissatisfaction with the environment
+* A lot of seating, nicely spread out
+* Can get a bit loud when it gets busy
+* Warm atmosphere
+* Overall seems satisfied with the ambiance
+* Loved the music they were playing
+* Dishes were not clean
+* Saw rats running around in the kitchen
+* Expresses overall dissatisfaction with the ambiance
+{{user_end}}
+{{assistant_start}}
 There are mixed sentiments regarding the ambiance at Cafe Kitchen. On the positive side, many were satisfied with the background music that is played. The atmosphere is generally warm and inviting, with the smell of coffee beans. However, some have expressed concerns with multiple reviews stating that cafe gets a bit loud during peak hours. Cleanliness is an issue as well. Dishes are not clean and one review had mentioned rats running around in the kitchen. Overall, it seems like the ambiance is pleasant, but if cleanliness and noise are big concerns, then it might be worth checking out a different cafe.
-=====\n
+{{assistant_end}}
+
+=====
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
 User: {{user_start}}{{ new_user_utterance }}{{user_end}}

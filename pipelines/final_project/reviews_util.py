@@ -6,7 +6,7 @@ def extract_relevant_content(review, topics, dialog_history, args):
     if len(topics) > 1:
         template_file = "final_project/prompts/extract_relevant_content_per_topic.prompt"
     else:
-        template_file = "final_project/prompts/extract_relevant_content_single_topic_2.prompt"
+        template_file = "final_project/prompts/extract_relevant_bullets_single_topic.prompt"
     prompt_parameters = {
         "dlg": dialog_history,
         "new_user_utterance": review,

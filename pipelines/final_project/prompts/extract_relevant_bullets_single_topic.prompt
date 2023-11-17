@@ -1,0 +1,42 @@
+{% block instruction %}
+{{system_start}}You are a friendly, knowledgeable and truthful chatbot, talking to a user.
+The user will provide a review from Yelp about a restaurant.
+Find the sentence or sentences in the review that are relevant to the {{topics[0]}} and return relevant sentences as bullet points.
+Do not return sentences that are not relevant to the {{topics[0]}}.
+If there are no relevant sentences, return "No relevant information found". {{system_end}}
+
+=====
+{{user_start}}: "Ordered from DoorDash. Just ordered the vegan tikka masala, and when I took a bite, it tasted like real meat. Lo and behold, it was real f-cking meat. Absolutely disgusting, and extremely disrespectful. I can't eat real meat, I can't eat dairy, and these wise guys here either don't care, are discriminatory towards vegans, or are just stupid stupid and stupid. We were also eating the noodles and found a 4 to 5 inch piece of plastic inside the chow mein noodles!! We threw the noodles away - that Piece of long rubber really did leave us without an appetite!!"
+[You are given this review and are asked about the food quality]
+{{user_end}}
+{{assistant_start}}
+*Ordered from DoorDash
+*Ordered vegan tikka masala, but it had real meat, absolutely disgusting
+*Plastic found inside chow mein noodles
+*Threw food away and left without an appetite
+{{assistant_end}}
+
+=====
+{{user_start}}: "One of the best casual Indian Nepali restaurant in the area, chowmein & momo tastes extremely delicious. Great environment to listen to music and enjoy food. The staff is so nice and the dine in experience was perfect for me. My friend George thought the staff was very attentive and fast!"
+[You are given this review and are asked about the food quality]
+{{user_end}}
+{{assistant_start}}
+*chowmein & momo tastes extremely delicious
+{{assistant_end}}
+=====
+
+{{user_start}}: "Food was great, customer service sucked. Drinks were also great. Food was fresh and hot. Definitely will be back. Need improvement as far as attitude with the employees."
+[You are given this review and are asked about the food quality]
+{{user_end}}
+{{assistant_start}}
+*Food was great
+*Drinks were also great
+*Food was fresh and hot
+{{assistant_end}}
+=====
+
+
+{% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
+{% block input %}
+User: {{user_start}}{{ new_user_utterance }}{{user_end}}
+You:{% endblock %}
