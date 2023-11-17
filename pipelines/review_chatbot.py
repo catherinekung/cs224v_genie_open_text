@@ -172,7 +172,6 @@ class Chatbot:
             relevant_content = extract_relevant_content(review, self.topics, dialog_history, self.args)
             if "No relevant information found" not in relevant_content:
                 bullet_content.append(relevant_content)
-                print(relevant_content)
                 summarization_content.append(relevant_content)
             else:
                 bullet_content.append(" ")
