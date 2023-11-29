@@ -169,7 +169,7 @@ class Chatbot:
         summarization_content = []
         start_time = time.time()
         for review in reviews:
-            relevant_content = extract_relevant_content(review, self.topics, dialog_history, self.args)
+            relevant_content = extract_relevant_content(review, self.topics, dialog_history, self.args, few_shot=True)
             if "No relevant information found" not in relevant_content and relevant_content != "":
                 bullet_content.append(relevant_content)
                 summarization_content.append(relevant_content)

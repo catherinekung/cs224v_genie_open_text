@@ -1,12 +1,16 @@
 from ..llm import llm_generate
 import re
 
-def extract_relevant_content(review, topics, dialog_history, args):
+def extract_relevant_content(review, topics, dialog_history, args, few_shot):
     # seems to seek other topics if only one is given, so splitting up into two cases
     if len(topics) > 1:
         template_file = "final_project/prompts/extract_relevant_content_per_topic.prompt"
     else:
-        template_file = "final_project/prompts/extract_relevant_bullets_single_topic.prompt"
+        if few_shot:
+            template_file = "final_project/prompts/extract_relevant_bullets_single_topic_few_shot.prompt"
+        else:
+            template_file = "final_project/prompts/extract_relevant_bullets_single_topic_zero_shot.prompt"
+    print(template_file)
     prompt_parameters = {
         "dlg": dialog_history,
         "new_user_utterance": review,
