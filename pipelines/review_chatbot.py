@@ -150,40 +150,41 @@ class Chatbot:
 
         return new_dlg_turn
 
-    def _output_to_csv(self, reviews, replies, summary, filename):
+    def _output_to_csv(self, reviews, relevent_content, replies, summary, filename):
         # print(self.review_list)
         # print(self.reply_list)
         # dictionary of lists
         reviews.append(" ")
         replies.append(" ")
+        self.extracted_content.append(" ")
 
         summaries = [" "] * (len(reviews) - 1)
         summaries.append(summary)
-        dict = {'Reviews': reviews, 'Relevant Bullets': replies, 'Summary': summaries}
+        dict = {'Reviews': reviews, 'Relevant Content': self.extracted_content, 'Replies': replies, 'Summary': summaries}
         df = pd.DataFrame(dict)
-        # saving the dataframe
         df.to_csv("pipelines/final_project/outputs/" + filename)
 
     def _main_flow(self, reviews, dialog_history, save_response=True):
         bullet_content = []
         summarization_content = []
         start_time = time.time()
+        self.extracted_content = []
+
         for review in reviews:
-            relevant_content = extract_relevant_content(review, self.topics, dialog_history, self.args, few_shot=True)
-            if "No relevant information found" not in relevant_content and relevant_content != "":
-                bullet_content.append(relevant_content)
-                summarization_content.append(relevant_content)
+            relevent_content = extract_relevant_content(review, self.topics, dialog_history, self.args, few_shot=False)
+            self.extracted_content.append(relevent_content)
+            if "No relevant information found" not in relevent_content:
+                content = transform_to_bullet_points(relevent_content, dialog_history, self.args)
+                bullet_content.append(content)
+                summarization_content.append(content)
             else:
                 bullet_content.append(" ")
-        if all(bullet == " " for bullet in summarization_content):
-            topics = " ".join(self.topics)
-            reply = f"There is no relevant information regarding the {topics} at {self.restaurant}."
-        else:
-            reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args)
+
+        reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args)
         if save_response:
             epoch = round(time.time())
             csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
-            self._output_to_csv(reviews, bullet_content, reply, csv_file_name)
+            self._output_to_csv(reviews, self.extracted_content, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
@@ -206,7 +207,7 @@ class Chatbot:
             new_user_utterance = "Tell me about Test Restaurant"
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
             if not topics_user_spec:
-                self.topics = ["ambience"] # return list of top 5 topics
+                self.topics = ["food"] # return list of top 5 topics
             else:
                 self.topics = [topics_user_spec]
             # print(self.topics)
@@ -238,4 +239,4 @@ class Chatbot:
                 reviews = location.get("reviews")
                 return self._main_flow(reviews, dialog_history)
             else:
-                return f"There isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"
+                return f"There are isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"

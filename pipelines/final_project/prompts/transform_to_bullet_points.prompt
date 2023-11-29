@@ -1,6 +1,7 @@
 {% block instruction %}
 {{system_start}}You are a friendly, knowledgeable and truthful chatbot, talking to a user.
-Transform the following sentences into concise bullet points, capturing only the main focus of each sentence. Remove any unnecessary details and rephrase the content into brief, clear points.
+Transform the following sentences into concise bullet points, capturing only the main focus of each sentence.
+Remove any unnecessary details and rephrase the content into brief, clear points.
 Return your response in the following format: Bullet points=[bullet points].
 Example: \n
 Original sentences="The atmosphere is casual and inviting. The staff members are generally friendly and efficient, although sometimes during peak hours, the service can be a bit slow. The seating areas are clean and comfortable, providing a pleasant environment to enjoy your meal."\n

@@ -1,0 +1,35 @@
+{% block instruction %}
+{{system_start}}You are a friendly, knowledgeable and truthful chatbot, talking to a user.
+Transform the following sentences into concise bullet points, capturing only the main focus of each sentence.
+Remove any unnecessary details and rephrase the content into brief, clear points.
+Return your response in the following format: Bullet points = [bullet points]. {{system_end}}
+
+=====
+{{user_start}}: "It was starting off good with all drinks. We got to the food and my sister found a fly in her rice and a cockroach in the drink. It was totally disgusting."
+{{user_end}}
+{{assistant_start}}
+* Insect contaminated food and drink
+* Expresses overall dissatisfaction with food and drinks
+{{assistant_end}}
+=====
+{{user_start}}: "Ordered via Doordash from the SF location. Very small quantity, and medium quality/taste for very high price. Would not recommend AT ALL"
+{{user_end}}
+{{assistant_start}}
+* Ordered from Doordash
+* Small quantity and average taste for high price
+* Expresses overall dissatisfaction and would not return
+{{assistant_end}}
+=====
+{{user_start}}: "The atmosphere is casual and inviting. The seating areas are clean and comfortable, providing a pleasant environment to enjoy your meal. The music they played was so soothing and was not too loud."
+{{user_end}}
+{{assistant_start}}
+* Casual and inviting atmosphere
+* Played soothing music, which was not too loud
+* Clean and comfortable seating areas
+* Expresses overall satisfaction with the ambiance and the environment at the restaurant
+{{assistant_end}}
+=====
+{% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
+{% block input %}
+User: {{user_start}}{{user_start}}:="{{ new_user_utterance }}"{{user_end}}
+You:{% endblock %}
