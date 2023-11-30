@@ -160,7 +160,8 @@ class Chatbot:
 
         summaries = [" "] * (len(reviews) - 1)
         summaries.append(summary)
-        dict = {'Reviews': reviews, 'Relevant Content': self.extracted_content, 'Replies': replies, 'Summary': summaries}
+        comments = [" "] * (len(reviews))
+        dict = {'Reviews': reviews, 'Relevant Content': self.extracted_content, 'Replies': replies, 'Comments': comments, 'Summary': summaries}
         df = pd.DataFrame(dict)
         df.to_csv("pipelines/final_project/outputs/" + filename)
 
