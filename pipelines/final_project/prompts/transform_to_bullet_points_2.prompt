@@ -5,20 +5,20 @@ Remove any unnecessary details and rephrase the content into brief, clear points
 Return your response in the following format: Bullet points = [bullet points]. {{system_end}}
 
 =====
-{{user_start}}: "It was starting off good with all drinks. We got to the food and my sister found a fly in her rice and a cockroach in the drink. It was totally disgusting."
+{{user_start}}"It was starting off good with all drinks. We got to the food and my sister found a fly in her rice and a cockroach in the drink. It was totally disgusting."
 {{user_end}}
 {{assistant_start}}
 * Insect contaminated food and drink
 {{assistant_end}}
 =====
-{{user_start}}: "Ordered via Doordash from the SF location. Very small quantity, and medium quality/taste for very high price. Would not recommend AT ALL"
+{{user_start}}"Ordered via Doordash from the SF location. Very small quantity, and medium quality/taste for very high price. Would not recommend AT ALL"
 {{user_end}}
 {{assistant_start}}
 * Ordered from Doordash
 * Small quantity and average taste for high price
 {{assistant_end}}
 =====
-{{user_start}}: "The atmosphere is casual and inviting. The seating areas are clean and comfortable, providing a pleasant environment to enjoy your meal. The music they played was so soothing and was not too loud."
+{{user_start}}"The atmosphere is casual and inviting. The seating areas are clean and comfortable, providing a pleasant environment to enjoy your meal. The music they played was so soothing and was not too loud."
 {{user_end}}
 {{assistant_start}}
 * Casual and inviting atmosphere
@@ -28,5 +28,5 @@ Return your response in the following format: Bullet points = [bullet points]. {
 =====
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
-User: {{user_start}}{{user_start}}:="{{ new_user_utterance }}"{{user_end}}
-You:{% endblock %}
+{{user_start}}"{{ new_user_utterance }}"{{user_end}}
+{% endblock %}

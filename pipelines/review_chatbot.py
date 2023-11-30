@@ -171,16 +171,20 @@ class Chatbot:
         self.extracted_content = []
 
         for review in reviews:
-            relevent_content = extract_relevant_content(review, self.topics, dialog_history, self.args, few_shot=False)
+            relevent_content = extract_relevant_content(review, self.topics, dialog_history, self.args, few_shot=True)
             self.extracted_content.append(relevent_content)
-            if "No relevant information found" not in relevent_content:
+            if "No relevant information found" not in relevent_content and relevent_content != "":
                 content = transform_to_bullet_points(relevent_content, dialog_history, self.args)
                 bullet_content.append(content)
                 summarization_content.append(content)
             else:
                 bullet_content.append(" ")
 
-        reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args)
+        if all(bullet == " " for bullet in summarization_content):
+            topics = " ".join(self.topics)
+            reply = f"There is no relevant information regarding the {topics} at {self.restaurant}."
+        else:
+            reply = summarize_reviews(summarization_content, self.topics, self.restaurant, dialog_history, self.args)
         if save_response:
             epoch = round(time.time())
             csv_file_name = self.restaurant.replace(" ", "_") + "_topic_" + self.topics[0].replace(" ", "_") + "_" + str(epoch) + ".csv"
@@ -239,4 +243,4 @@ class Chatbot:
                 reviews = location.get("reviews")
                 return self._main_flow(reviews, dialog_history)
             else:
-                return f"There are isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"
+                return f"There isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"

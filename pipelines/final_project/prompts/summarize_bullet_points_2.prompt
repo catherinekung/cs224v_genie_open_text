@@ -58,5 +58,8 @@ There are mixed sentiments regarding the ambiance at Cafe Kitchen. On the positi
 =====
 {% endblock %}{% block short_instruction %}Talk to the user.{% endblock %}
 {% block input %}
-User: {{user_start}}{{ new_user_utterance }}{{user_end}}
+User: {{user_start}}
+[These are bullet points related to {{topics}} at {{restaurant}}]
+{{ new_user_utterance }}
+{{user_end}}
 You:{% endblock %}
