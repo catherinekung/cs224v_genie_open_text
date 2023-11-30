@@ -20,8 +20,8 @@ def evaluate():
             name = r if isinstance(r, str) else r[0]
             print(f"Getting summary for {name}")
             chatbot.restaurant = name
-            chatbot.topics = ["food quality"]
-            reviews = chatbot.yelp_handler.fetch_reviews(f"Tell me about the food quality at {name}")
+            chatbot.topics = ["ambiance"]
+            reviews = chatbot.yelp_handler.fetch_reviews(f"Tell me about the ambiance at {name}")
             if len(reviews) > 0 and isinstance(reviews[0], dict):
                 for location in reviews:
                     if location.get("address") == r[1]:
