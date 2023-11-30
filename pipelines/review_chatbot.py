@@ -180,7 +180,7 @@ class Chatbot:
             else:
                 bullet_content.append(" ")
 
-        if all(bullet == " " for bullet in summarization_content):
+        if all(bullet == " " for bullet in bullet_content):
             topics = " ".join(self.topics)
             reply = f"There is no relevant information regarding the {topics} at {self.restaurant}."
         else:
