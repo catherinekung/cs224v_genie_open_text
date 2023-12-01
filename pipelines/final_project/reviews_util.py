@@ -10,7 +10,7 @@ def extract_relevant_content(review, topics, dialog_history, args, few_shot):
             template_file = "final_project/prompts/extract_relevant_bullets_single_topic_few_shot.prompt"
         else:
             template_file = "final_project/prompts/extract_relevant_bullets_single_topic_zero_shot.prompt"
-    print(template_file)
+    # print(template_file)
     prompt_parameters = {
         "dlg": dialog_history,
         "new_user_utterance": review,
