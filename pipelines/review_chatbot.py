@@ -209,7 +209,7 @@ class Chatbot:
             - `reply`(str): GPT3 original response
         """
         if self.initial_utterance:
-            new_user_utterance = new_user_utterance #"Tell me about Test Restaurant"
+            new_user_utterance = new_user_utterance # "Tell me about Test Restaurant"
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
             if not topics_user_spec:
                 self.topics = ["food"] # return list of top 5 topics
