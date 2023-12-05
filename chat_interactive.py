@@ -55,6 +55,9 @@ def main(args):
         # turn_log = json.dumps(new_dlg_turn.log(), indent=2, ensure_ascii=False)
         # logger.info("Turn log: %s", turn_log)
         print_chatbot("Chatbot: " + new_dlg_turn.agent_utterance)
+        if new_dlg_turn.agent_utterance == "Thanks for chatting with me. Have a great day!":
+            # stop the chatbot
+            break
 
         make_parent_directories(args.output_file)
         with open(args.output_file, "a") as outfile:
@@ -92,8 +95,8 @@ if __name__ == "__main__":
         help="The conversation will continue until this string is typed in.",
     )
     args = parser.parse_args()
-    print("-----")
-    print(args)
+    # print("-----")
+    # print(args)
     check_pipeline_arguments(args)
 
     if args.no_logging:

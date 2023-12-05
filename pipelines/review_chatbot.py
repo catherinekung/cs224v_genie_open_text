@@ -10,6 +10,7 @@ from .final_project.read_mongo_data import Yelp_Data
 import json
 import os
 from collections import defaultdict
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -36,17 +37,19 @@ class Chatbot:
         self.options = None
         self.restaurant_topic_mapping = {}
         self.restaurant_summary_mapping = {}
+        self.pick_topic = False
+        self.ending_statement = False
         self._preprocess_steps()
 
     def _preprocess_steps(self):
-        topic_file_path = "pipelines/final_project/dump_data/restaurant_topics.json"
+        topic_file_path = "pipelines/final_project/dump_data/restaurant_topics_kantine.json"
         if os.path.exists(topic_file_path):
             with open(topic_file_path, "r") as file:
                 self.restaurant_topic_mapping = json.load(file)
         else:
             self._generate_top_topics_per_restaurant()
 
-        summary_file_path = "pipelines/final_project/dump_data/restaurant_summaries.json"
+        summary_file_path = "pipelines/final_project/dump_data/restaurant_summaries_kantine.json"
         if os.path.exists(summary_file_path):
             with open(summary_file_path, "r") as file:
                 self.restaurant_summary_mapping = json.load(file)
@@ -56,31 +59,33 @@ class Chatbot:
     def _generate_top_topics_per_restaurant(self):
         restaurant_topic_store = {}
         for restaurant, value in self.yelp_handler.data_reviews_only.items():
-            for location in value:
-                print(f"Getting topics for {restaurant} on {location.get('address')}")
-                topics_all = []
-                for review in location.get("reviews"):
-                    response_review = extract_topics_from_review(review, self.args)
-                    topic_list = get_topics_from_response(response_review)
-                    topics_all += topic_list
-                print("Finished getting all topics for all reviews. Generalizing topics...")
-                response_generalized = generalize_topics(topics_all, self.args)
-                top_topics = get_topics_from_response(response_generalized)
-                print(f"Top 5 topics: {top_topics}")
-                # location["topics"] = top_topics # modifies in place
+            if restaurant == "Kantine":
+                for location in value:
+                    print(f"Getting topics for {restaurant} on {location.get('address')}")
+                    topics_all = []
+                    for review in location.get("reviews"):
+                        response_review = extract_topics_from_review(review, self.args)
+                        topic_list = get_topics_from_response(response_review)
+                        topics_all += topic_list
+                    print("Finished getting all topics for all reviews. Generalizing topics...")
+                    response_generalized = generalize_topics(topics_all, self.args)
+                    top_topics = get_topics_from_response(response_generalized)
+                    print(f"Top 5 topics: {top_topics}")
+                    # location["topics"] = top_topics # modifies in place
 
-                # dump to local file
-                if len(value) == 1:
-                    restaurant_topic_store[restaurant] = top_topics
-                else:
-                    entry = {"city": location.get("city"), "address": location.get("address"),
-                             "topics": top_topics}
-                    if restaurant not in restaurant_topic_store:
-                        restaurant_topic_store[restaurant] = [entry]
+                    # dump to local file
+                    if len(value) == 1:
+                        restaurant_topic_store[restaurant] = top_topics
                     else:
-                        restaurant_topic_store[restaurant].append(entry)
+                        entry = {"city": location.get("city"), "address": location.get("address"),
+                                 "topics": top_topics}
+                        if restaurant not in restaurant_topic_store:
+                            restaurant_topic_store[restaurant] = [entry]
+                        else:
+                            restaurant_topic_store[restaurant].append(entry)
 
-        with open('pipelines/final_project/dump_data/restaurant_topics.json', 'w') as file:
+        self.restaurant_topic_mapping = restaurant_topic_store
+        with open('pipelines/final_project/dump_data/restaurant_topics_kantine.json', 'w') as file:
             json.dump(restaurant_topic_store, file)
 
     def _generate_summaries_based_on_top_topics(self):
@@ -109,7 +114,7 @@ class Chatbot:
                         topic_summary_mapping[topic] = summary
                     restaurant_summary_store[restaurant].append({"topics": topic_summary_mapping, "city": reviews[i].get("city"), "address": reviews[i].get("address")})
 
-        with open('pipelines/final_project/dump_data/restaurant_summaries.json', 'w') as file:
+        with open('pipelines/final_project/dump_data/restaurant_summaries_kantine.json', 'w') as file:
             json.dump(restaurant_summary_store, file)
 
     def generate_next_turn(
@@ -208,15 +213,22 @@ class Chatbot:
         Returns:
             - `reply`(str): GPT3 original response
         """
-        if self.initial_utterance:
+        if new_user_utterance == 'Hi!':
+            return "Hi, I'm Yelp Summarizer. Ask me anything about a restaurant and I'll try my best to answer it based off of reviews on Yelp!"
+        if self.initial_utterance and not self.pick_topic:
             new_user_utterance = new_user_utterance # "Tell me about Test Restaurant"
             topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
             if not topics_user_spec:
-                self.topics = ["food"] # return list of top 5 topics
+                self.topics = self.restaurant_topic_mapping[self.restaurant] # return list of top 5 topics
+                self.pick_topic = True
+                time.sleep(1)
+                return f"I found a restaurant called Kantine in San Francisco. It is located at 1906 Market St, San Francisco, CA 94102 and offers Scandinavian and breakfast & brunch cuisines. I see that you did not provide a specific topic of interest regarding {self.restaurant}! Most reviews talked either about {', '.join(self.topics[:4])}, or {self.topics[4]}. Would you like to learn more about one of these topics?"
             else:
                 self.topics = [topics_user_spec]
             # print(self.topics)
             # print(self.restaurant)
+            if self.restaurant in self.restaurant_summary_mapping and topics_user_spec in self.restaurant_summary_mapping[self.restaurant][0]:
+                return self.restaurant_summary_mapping[self.restaurant][0][topics_user_spec]
             reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
             if len(reviews) > 0 and isinstance(reviews[0], dict):
                 # case where there are multiple locations
@@ -224,6 +236,21 @@ class Chatbot:
                 return f"There are multiple locations for {self.restaurant}. Which city would you like to search in?"
             else:
                 return self._main_flow(reviews, dialog_history)
+        elif self.initial_utterance and self.pick_topic:
+            topic = new_user_utterance.split(" ")[-1]
+            self.topics = [topic]
+            # print(self.topics)
+            # print(self.restaurant)
+            self.pick_topic = False
+            self.initial_utterance = False
+            reviews = self.yelp_handler.fetch_reviews(f"Tell me about the {topic} at {self.restaurant}")
+            if self.restaurant in self.restaurant_summary_mapping and topic in self.restaurant_summary_mapping[self.restaurant][0]:
+                self.ending_statement = True
+                time.sleep(2)
+                return self.restaurant_summary_mapping[self.restaurant][0][topic] + " Is there anything else I can help you with?"
+            return self._main_flow(reviews, dialog_history)
+        elif self.ending_statement:
+            return "Thanks for chatting with me. Have a great day!"
         else:
             if self.yelp_handler.is_valid_city(new_user_utterance, self.restaurant) and not new_user_utterance.isnumeric():
                 self.options = self.yelp_handler.fetch_all_locations_by_city(new_user_utterance, self.restaurant)

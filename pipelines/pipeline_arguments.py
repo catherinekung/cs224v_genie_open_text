@@ -65,7 +65,7 @@ def add_pipeline_arguments(parser):
         "--engine",
         type=str,
         required=False,
-        default = "gpt-35-turbo",
+        default = "gpt-4",
         choices=[
             "atlas",
             "gpt-35-turbo",

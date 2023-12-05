@@ -46,7 +46,7 @@ class Yelp_Data():
 
                 self.add_element(data_reviews_only, name, location["city"], location["address1"], location["zip_code"], reviews)
         # print(restaurants_ratings)
-        print(len(data_reviews_only))
+        # print(len(data_reviews_only))
         return data_reviews_only
 
     # give restaurants with rating 3.0
@@ -105,7 +105,7 @@ class Yelp_Data():
             return restaurant_data # return list of location data
         else:
             reviews = restaurant_data[0].get("reviews", [])
-        print("\tReview from:", f"{restaurant_data[0].get('address')} in {restaurant_data[0].get('city')}")
+        # print("\tReview from:", f"{restaurant_data[0].get('address')} in {restaurant_data[0].get('city')}")
         return reviews
         # print("\tReviews: ", reviews)
 
