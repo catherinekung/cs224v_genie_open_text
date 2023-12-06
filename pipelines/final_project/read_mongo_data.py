@@ -27,10 +27,11 @@ class Yelp_Data():
         restaurants_ratings = defaultdict(list)
         for i in range(len(data)):
             # Check that location, name, and review exist
-            if ("name" in data[i]) and ("reviews" in data[i]) and ("location" in data[i]):
+            if ("name" in data[i]) and ("reviews" in data[i]) and ("location" in data[i]) and ("categories" in data[i]):
                 location = data[i]["location"]
                 name = data[i]["name"] # restaurant name
                 reviews = data[i]["reviews"] # all reviews
+                categories = data[i]["categories"]
 
                 entry = (name, location["address1"], len(reviews))
                 if data[i].get("rating") == 1.0:
@@ -44,15 +45,15 @@ class Yelp_Data():
                 if data[i].get("rating") == 5.0:
                     restaurants_ratings["five"].append(entry)
 
-                self.add_element(data_reviews_only, name, location["city"], location["address1"], location["zip_code"], reviews)
+                self.add_element(data_reviews_only, name, location["city"], location["address1"], location["zip_code"], categories, reviews)
         # print(restaurants_ratings)
         # print(len(data_reviews_only))
         return data_reviews_only
 
     # give restaurants with rating 3.0
     # {name: {city: city, address: address, zipcode: zipcode, reviews: reviews}}
-    def add_element(self, dict_input, name, city, address, zipcode, reviews):
-        new_dict = {"city": city, "address": address, "zipcode": zipcode, "reviews": reviews}
+    def add_element(self, dict_input, name, city, address, zipcode, categories, reviews):
+        new_dict = {"city": city, "address": address, "zipcode": zipcode, "categories": categories, "reviews": reviews}
         # If the key exists, append the review to the existing list of reviews
         if name in dict_input:
             dict_input[name].append(new_dict)

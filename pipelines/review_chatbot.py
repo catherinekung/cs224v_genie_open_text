@@ -39,6 +39,7 @@ class Chatbot:
         self.restaurant_summary_mapping = {}
         self.pick_topic = False
         self.ending_statement = False
+        self.choose_location = False
         self._preprocess_steps()
 
     def _preprocess_steps(self):
@@ -197,9 +198,51 @@ class Chatbot:
             self._output_to_csv(reviews, self.extracted_content, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
-        print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
+        # print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
-        return reply
+        return reply + " Is there anything else I can help you with?"
+
+    def initial_interaction(self, new_user_utterance, dialog_history):
+        topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
+        if self.restaurant not in self.yelp_handler.data_reviews_only:
+            return "I do not have information on that restaurant. Let's try again with another restaurant!"
+        if not topics_user_spec:
+            reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
+            if len(reviews) > 0 and isinstance(reviews[0], dict):
+                city = "with multiple locations"
+                if len(reviews[0]["categories"]) > 0:
+                    background = f", a {reviews[0]['categories'][0]['title']} place,"
+                else:
+                    background = ''
+            else:
+                city = "in " + self.yelp_handler.data_reviews_only[self.restaurant][0]["city"]
+                if len(self.yelp_handler.data_reviews_only[self.restaurant][0]["categories"]) > 0:
+                    background = f", a {self.yelp_handler.data_reviews_only[self.restaurant][0]['categories'][0]['title']} place,"
+                else:
+                    background = ''
+            if self.restaurant in self.restaurant_topic_mapping:
+                self.topics = self.restaurant_topic_mapping[self.restaurant]  # return list of top 5 topics
+                self.pick_topic = True
+                return f"I found a restaurant called {self.restaurant}{background} {city}. I see that you did not provide a specific topic of interest regarding {self.restaurant}! Most reviews talked either about {', '.join(self.topics[:4])}, or {self.topics[4]}. Would you like to learn more about one of these topics?"
+            self.pick_topic = True
+            return f"I found a restaurant called {self.restaurant}{background} {city}. I see that you did not provide a specific topic of interest regarding {self.restaurant}! Some common topics regarding restaurants include ambiance, service, food quality and pricing. Would you like to learn more about one of these topics?"
+        else:
+            self.topics = [topics_user_spec]
+        # print(self.topics)
+        # print(self.restaurant)
+        if self.restaurant in self.restaurant_summary_mapping and topics_user_spec in \
+                self.restaurant_summary_mapping[self.restaurant][0]:
+            return self.restaurant_summary_mapping[self.restaurant][0][topics_user_spec]
+        reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
+        if len(reviews) > 0 and isinstance(reviews[0], dict):
+            # case where there are multiple locations
+            self.initial_utterance = False
+            cities = [location.get("city") for location in reviews]
+            unique_cities = list(set(cities))
+            self.choose_location = True
+            return f"There are multiple locations for {self.restaurant}. Which city would you like to search in? I found locations in: {', '.join(unique_cities)}."
+        else:
+            return self._main_flow(reviews, dialog_history)
 
     def _generate_review_topics(
             self,
@@ -216,26 +259,7 @@ class Chatbot:
         if new_user_utterance == 'Hi!':
             return "Hi, I'm Yelp Summarizer. Ask me anything about a restaurant and I'll try my best to answer it based off of reviews on Yelp!"
         if self.initial_utterance and not self.pick_topic:
-            new_user_utterance = new_user_utterance # "Tell me about Test Restaurant"
-            topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
-            if not topics_user_spec:
-                self.topics = self.restaurant_topic_mapping[self.restaurant] # return list of top 5 topics
-                self.pick_topic = True
-                time.sleep(1)
-                return f"I found a restaurant called Kantine in San Francisco. It is located at 1906 Market St, San Francisco, CA 94102 and offers Scandinavian and breakfast & brunch cuisines. I see that you did not provide a specific topic of interest regarding {self.restaurant}! Most reviews talked either about {', '.join(self.topics[:4])}, or {self.topics[4]}. Would you like to learn more about one of these topics?"
-            else:
-                self.topics = [topics_user_spec]
-            # print(self.topics)
-            # print(self.restaurant)
-            if self.restaurant in self.restaurant_summary_mapping and topics_user_spec in self.restaurant_summary_mapping[self.restaurant][0]:
-                return self.restaurant_summary_mapping[self.restaurant][0][topics_user_spec]
-            reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
-            if len(reviews) > 0 and isinstance(reviews[0], dict):
-                # case where there are multiple locations
-                self.initial_utterance = False
-                return f"There are multiple locations for {self.restaurant}. Which city would you like to search in?"
-            else:
-                return self._main_flow(reviews, dialog_history)
+            return self.initial_interaction(new_user_utterance, dialog_history)
         elif self.initial_utterance and self.pick_topic:
             topic = new_user_utterance.split(" ")[-1]
             self.topics = [topic]
@@ -246,11 +270,16 @@ class Chatbot:
             reviews = self.yelp_handler.fetch_reviews(f"Tell me about the {topic} at {self.restaurant}")
             if self.restaurant in self.restaurant_summary_mapping and topic in self.restaurant_summary_mapping[self.restaurant][0]:
                 self.ending_statement = True
-                time.sleep(2)
                 return self.restaurant_summary_mapping[self.restaurant][0][topic] + " Is there anything else I can help you with?"
             return self._main_flow(reviews, dialog_history)
-        elif self.ending_statement:
+        elif not self.initial_utterance and "Tell me about" not in new_user_utterance and not self.choose_location or self.ending_statement:
             return "Thanks for chatting with me. Have a great day!"
+        elif not self.initial_utterance and ("Tell me about" in new_user_utterance or "tell me about" in new_user_utterance):
+            self.initial_utterance = True
+            self.pick_topic = False
+            self.city_confirmed = False
+            self.choose_location = False
+            return self.initial_interaction(new_user_utterance, dialog_history)
         else:
             if self.yelp_handler.is_valid_city(new_user_utterance, self.restaurant) and not new_user_utterance.isnumeric():
                 self.options = self.yelp_handler.fetch_all_locations_by_city(new_user_utterance, self.restaurant)
@@ -264,11 +293,13 @@ class Chatbot:
                         i += 1
                     self.city_confirmed = True
                     return f"There are multiple locations in {new_user_utterance}, select the location number from the following options: \n{locations}"
+                self.initial_utterance = False
                 return self._main_flow(self.options[0].get("reviews"), dialog_history)
             elif new_user_utterance.isnumeric() and self.city_confirmed:
                 index = int(new_user_utterance)
                 location = self.options[index-1]
                 reviews = location.get("reviews")
+                self.initial_utterance = False
                 return self._main_flow(reviews, dialog_history)
             else:
                 return f"There isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"
