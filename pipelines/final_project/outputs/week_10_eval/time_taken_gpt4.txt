@@ -1,0 +1,40 @@
+Getting summary for Butter Chicken Snob
+Elapsed Time:0.9967504819234212 minutes
+Getting summary for Beverly Hills Burger Bungalow
+Elapsed Time:0.6136994322141012 minutes
+Getting summary for Tamale Barn
+Elapsed Time:0.2512372493743896 minutes
+Getting summary for Betty Jeanz Sole Food
+Elapsed Time:0.13253181378046672 minutes
+Getting summary for La Kbaña Del Tio Tavito
+Elapsed Time:1.2207449992497763 minutes
+Getting summary for Weinerschnitzel
+Elapsed Time:2.051767333348592 minutes
+Getting summary for Wingstop
+Elapsed Time:0.398823082447052 minutes
+Getting summary for Z Bar & Restaurant
+Elapsed Time:0.033551013469696044 minutes
+Getting summary for Fu Kee Restaurant
+Elapsed Time:1.9220877687136333 minutes
+Getting summary for La Tradición De Nueva Italia
+Elapsed Time:0.9008930961290995 minutes
+Getting summary for Las Micheladas
+Elapsed Time:0.09192785024642944 minutes
+Getting summary for Quarantine Express
+Elapsed Time:0.3789311687151591 minutes
+Getting summary for The Creek Eatery
+Elapsed Time:2.31570409933726 minutes
+Getting summary for Stratus Restaurant and Bar
+Elapsed Time:0.7408227125803629 minutes
+Getting summary for hashtable
+Elapsed Time:0.5483347376187643 minutes
+Getting summary for DV Cafe
+Elapsed Time:0.11859468619028728 minutes
+Getting summary for California MoMo Kitchen
+Elapsed Time:1.7518198331197103 minutes
+Getting summary for Maxine Kitchen
+Elapsed Time:1.0819462974866232 minutes
+Getting summary for Taquisas Los Juanes
+Elapsed Time:0.4197097142537435 minutes
+Getting summary for Bay Taco Fish
+Elapsed Time:0.232467516263326 minutes

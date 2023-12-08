@@ -9,7 +9,7 @@ restaurants_by_rating = {1: [("Butter Chicken Snob", '150 S 1st St'), ("Beverly 
                4: ["The Creek Eatery", "Stratus Restaurant and Bar", "hashtable", "DV Cafe"],
                5: ["California MoMo Kitchen", "Maxine Kitchen", "Taquisas Los Juanes", "Bay Taco Fish"]}
 
-args = Namespace(pipeline='reviews', engine='gpt-35-turbo', max_tokens=250, temperature=1.0, top_p=0.9, frequency_penalty=0.0, presence_penalty=0.0, evi_num=2, output_file='data/demo.txt', no_logging=False, debug_mode=False, quit_commands=['quit', 'q', 'Exit'])
+args = Namespace(pipeline='reviews', engine='gpt-4', max_tokens=250, temperature=1.0, top_p=0.9, frequency_penalty=0.0, presence_penalty=0.0, evi_num=2, output_file='data/demo.txt', no_logging=False, debug_mode=False, quit_commands=['quit', 'q', 'Exit'])
 chatbot = Chatbot(args)
 
 
