@@ -198,9 +198,9 @@ class Chatbot:
             self._output_to_csv(reviews, self.extracted_content, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
-        # print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
+        print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
-        return reply + " Is there anything else I can help you with?"
+        return reply #+ " Is there anything else I can help you with?"
 
     def initial_interaction(self, new_user_utterance, dialog_history):
         topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
