@@ -1,7 +1,7 @@
 # CS224V Final Project
 
 ## Setup
-Follow the [Setup](https://github.com/catherinekung/cs224v_genie_open_text#setup) in the root directory of this repo.
+Follow these [Setup](https://github.com/catherinekung/cs224v_genie_open_text#setup) instructions.
 
 ## Modifications to Original Repo
 We leveraged the existing chatbot flow in this repo and made the following changes:
@@ -20,14 +20,14 @@ We leveraged the existing chatbot flow in this repo and made the following chang
 
 
 ## Run Yelp Summarizer
-Begin by navigating to root directory.
+Begin by navigating to the root directory.
 
 Run the chat interface and prompt with `Tell me about {topic} at {restaurant}`
 ```
 python3 chat_interactive.py
 ```
 
-Generate a summary for a given restaurant and topic (can modify [examples](https://github.com/catherinekung/cs224v_genie_open_text/blob/main/yelp_summarizer_example.py#L10) before generating) 
+Generate a summary for a given restaurant and topic (can modify [examples](https://github.com/catherinekung/cs224v_genie_open_text/blob/main/yelp_summarizer_example.py#L10-L12) before generating) 
 ```
 python3 yelp_summarizer_example.py
 ```
