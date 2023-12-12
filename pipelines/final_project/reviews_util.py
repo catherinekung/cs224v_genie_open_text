@@ -7,9 +7,9 @@ def extract_relevant_content(review, topics, dialog_history, args, few_shot):
         template_file = "final_project/prompts/extract_relevant_content_per_topic.prompt"
     else:
         if few_shot:
-            template_file = "final_project/prompts/extract_relevant_bullets_single_topic_few_shot.prompt"
+            template_file = "final_project/prompts/extract_relevant_content_single_topic_few_shot.prompt"
         else:
-            template_file = "final_project/prompts/extract_relevant_bullets_single_topic_zero_shot.prompt"
+            template_file = "final_project/prompts/extract_relevant_content_single_topic_zero_shot.prompt"
     # print(template_file)
     prompt_parameters = {
         "dlg": dialog_history,

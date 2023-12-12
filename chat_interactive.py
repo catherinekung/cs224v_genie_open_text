@@ -27,7 +27,7 @@ if not logger.handlers:
 
 
 def main(args):
-    chatbot = Chatbot(args)
+    chatbot = Chatbot(args, 'pipelines/final_project')
 
     dlg_history: List[DialogueTurn] = []
 

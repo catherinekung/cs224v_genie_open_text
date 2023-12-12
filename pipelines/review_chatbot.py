@@ -25,14 +25,15 @@ class Chatbot:
     Chatbot for CS224V Final Project
     """
 
-    def __init__(self, args) -> None:
+    def __init__(self, args, project_file_path) -> None:
+        self.project_file_path = project_file_path
         self.args = args
         self.restaurant = ""
         self.city_confirmed = False
         self.topics = []
         self.locations = []
         self.extracted_content = []
-        self.yelp_handler = Yelp_Data(r'pipelines/final_project/dump_data/yelp_data.bson')
+        self.yelp_handler = Yelp_Data(project_file_path + '/dump_data/yelp_data.bson')
         self.initial_utterance = True # Tell me about {topic} at {restaurant}
         self.options = None
         self.restaurant_topic_mapping = {}
@@ -43,14 +44,15 @@ class Chatbot:
         self._preprocess_steps()
 
     def _preprocess_steps(self):
-        topic_file_path = "pipelines/final_project/dump_data/restaurant_topics_kantine.json"
+        # generate top five topics per restaurant and generate the summaries for those restaurants to be stored
+        topic_file_path = self.project_file_path + "/dump_data/restaurant_topics_kantine.json"
         if os.path.exists(topic_file_path):
             with open(topic_file_path, "r") as file:
                 self.restaurant_topic_mapping = json.load(file)
         else:
             self._generate_top_topics_per_restaurant()
 
-        summary_file_path = "pipelines/final_project/dump_data/restaurant_summaries_kantine.json"
+        summary_file_path = self.project_file_path + "/dump_data/restaurant_summaries_kantine.json"
         if os.path.exists(summary_file_path):
             with open(summary_file_path, "r") as file:
                 self.restaurant_summary_mapping = json.load(file)
@@ -86,7 +88,7 @@ class Chatbot:
                             restaurant_topic_store[restaurant].append(entry)
 
         self.restaurant_topic_mapping = restaurant_topic_store
-        with open('pipelines/final_project/dump_data/restaurant_topics_kantine.json', 'w') as file:
+        with open(self.project_file_path + '/dump_data/restaurant_topics_kantine.json', 'w') as file:
             json.dump(restaurant_topic_store, file)
 
     def _generate_summaries_based_on_top_topics(self):
@@ -115,7 +117,7 @@ class Chatbot:
                         topic_summary_mapping[topic] = summary
                     restaurant_summary_store[restaurant].append({"topics": topic_summary_mapping, "city": reviews[i].get("city"), "address": reviews[i].get("address")})
 
-        with open('pipelines/final_project/dump_data/restaurant_summaries_kantine.json', 'w') as file:
+        with open(self.project_file_path + '/dump_data/restaurant_summaries_kantine.json', 'w') as file:
             json.dump(restaurant_summary_store, file)
 
     def generate_next_turn(
@@ -169,7 +171,7 @@ class Chatbot:
         comments = [" "] * (len(reviews))
         dict = {'Reviews': reviews, 'Relevant Content': self.extracted_content, 'Replies': replies, 'Comments': comments, 'Summary': summaries}
         df = pd.DataFrame(dict)
-        df.to_csv("pipelines/final_project/outputs/" + filename)
+        df.to_csv(self.project_file_path + "/outputs/" + filename)
 
     def _main_flow(self, reviews, dialog_history, save_response=True):
         bullet_content = []
@@ -200,7 +202,7 @@ class Chatbot:
         end_time = time.time()
         print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
-        return reply #+ " Is there anything else I can help you with?"
+        return reply
 
     def initial_interaction(self, new_user_utterance, dialog_history):
         topics_user_spec, self.restaurant = self.yelp_handler.get_topic_and_restaurant(new_user_utterance)
@@ -232,7 +234,8 @@ class Chatbot:
         # print(self.restaurant)
         if self.restaurant in self.restaurant_summary_mapping and topics_user_spec in \
                 self.restaurant_summary_mapping[self.restaurant][0]:
-            return self.restaurant_summary_mapping[self.restaurant][0][topics_user_spec]
+            self.initial_utterance = False
+            return self.restaurant_summary_mapping[self.restaurant][0][topics_user_spec] + " Is there anything else I can help you with?"
         reviews = self.yelp_handler.fetch_reviews(new_user_utterance)
         if len(reviews) > 0 and isinstance(reviews[0], dict):
             # case where there are multiple locations
@@ -242,7 +245,7 @@ class Chatbot:
             self.choose_location = True
             return f"There are multiple locations for {self.restaurant}. Which city would you like to search in? I found locations in: {', '.join(unique_cities)}."
         else:
-            return self._main_flow(reviews, dialog_history)
+            return self._main_flow(reviews, dialog_history) + " Is there anything else I can help you with?"
 
     def _generate_review_topics(
             self,
@@ -269,7 +272,6 @@ class Chatbot:
             self.initial_utterance = False
             reviews = self.yelp_handler.fetch_reviews(f"Tell me about the {topic} at {self.restaurant}")
             if self.restaurant in self.restaurant_summary_mapping and topic in self.restaurant_summary_mapping[self.restaurant][0]:
-                self.ending_statement = True
                 return self.restaurant_summary_mapping[self.restaurant][0][topic] + " Is there anything else I can help you with?"
             return self._main_flow(reviews, dialog_history)
         elif not self.initial_utterance and "Tell me about" not in new_user_utterance and not self.choose_location or self.ending_statement:
@@ -300,6 +302,22 @@ class Chatbot:
                 location = self.options[index-1]
                 reviews = location.get("reviews")
                 self.initial_utterance = False
-                return self._main_flow(reviews, dialog_history)
+                return self._main_flow(reviews, dialog_history) + " Is there anything else I can help you with?"
             else:
                 return f"There isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"
+
+    def generate_response(self, restaurant, topic, address=None):
+        # pass in address if restaurant has multiple locations
+        print(f"Generating summary for {restaurant} about {topic}")
+        self.restaurant = restaurant
+        self.topics = [topic]
+        if self.restaurant not in self.yelp_handler.data_reviews_only:
+            return "Restaurant not found"
+        reviews = self.yelp_handler.fetch_reviews(f"Tell me about the {topic} at {restaurant}")
+        if len(reviews) > 0 and isinstance(reviews[0], dict):
+            # case where there's multiple locations
+            for location in reviews:
+                if location.get("address") == address:
+                    return self._main_flow(location.get("reviews"), [], True)
+            return f"Restaurant with specified location at {address} not found"
+        return self._main_flow(reviews, [], True)

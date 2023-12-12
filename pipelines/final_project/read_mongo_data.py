@@ -9,7 +9,7 @@ class Yelp_Data():
 
     def __init__(self, file_path):
         self.data_reviews_only = self.get_database(file_path)
-        self.load_test_restaurant()
+        # self.load_test_restaurant()
 
     def load_test_restaurant(self):
         with open(r"pipelines/final_project/dump_data/test_restaurant_reviews.csv") as file:
