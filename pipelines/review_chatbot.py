@@ -178,6 +178,8 @@ class Chatbot:
         summarization_content = []
         start_time = time.time()
         self.extracted_content = []
+        if isinstance(reviews[0], dict):
+            reviews = reviews[0].get("reviews")
 
         for review in reviews:
             relevent_content = extract_relevant_content(review, self.topics, dialog_history, self.args, few_shot=True)
