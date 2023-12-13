@@ -200,7 +200,7 @@ class Chatbot:
             self._output_to_csv(reviews, self.extracted_content, bullet_content, reply, csv_file_name)
 
         end_time = time.time()
-        print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
+        # print("Elapsed Time:" + str((end_time - start_time) / 60) + " minutes")
         self.initial_utterance = False
         return reply
 
@@ -302,6 +302,7 @@ class Chatbot:
                 location = self.options[index-1]
                 reviews = location.get("reviews")
                 self.initial_utterance = False
+                self.choose_location = False
                 return self._main_flow(reviews, dialog_history) + " Is there anything else I can help you with?"
             else:
                 return f"There isn't a {self.restaurant} in {new_user_utterance}. Enter City Again?"
